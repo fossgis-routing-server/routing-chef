@@ -1,0 +1,17 @@
+# File maintained by Chef. Do not edit.
+
+[Unit]
+Description=Open Source Routing Machine precomputation
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=osrm
+Group=osrm
+ExecStart=/bin/bash <%= @basedir %>/scripts/build-graphs.sh
+Restart=always
+RestartSec=700
+
+[Install]
+WantedBy=multi-user.target
+

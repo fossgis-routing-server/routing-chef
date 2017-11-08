@@ -1,0 +1,50 @@
+# File maintained by Chef. Do not edit.
+
+<VirtualHost *:<%= @port %>>
+  ServerAdmin admin@<%= @domain %>
+  ServerName <%= @domain %>
+
+<% if @port == 443 -%>
+#
+# Enable SSL
+#
+   SSLEngine on
+<% end -%>
+
+  ErrorLog ${APACHE_LOG_DIR}/routing.error.log
+
+  # Possible values include: debug, info, notice, warn, error, crit,
+  # alert, emerg.
+  LogLevel warn
+
+  CustomLog ${APACHE_LOG_DIR}/routing.access.log combined
+
+
+  DocumentRoot <%= @directory %>
+  <Directory <%= @directory %>>
+     DirectoryIndex index.html
+     Options FollowSymLinks
+     AllowOverride None
+     Require all granted
+  </Directory>
+
+  Alias /munin <%= @munindir %>
+  <Directory <%= @munindir %>>
+     Options Indexes FollowSymLinks
+     AllowOverride None
+     Order allow,deny
+     allow from all
+     Require all granted
+  </Directory>
+
+
+  ProxyRequests Off
+  ProxyPass /routed-car http://localhost:3331
+  ProxyPassReverse /routed-car http://localhost:3331
+  ProxyPass /routed-bike http://localhost:3332
+  ProxyPassReverse /routed-bike http://localhost:3332
+  ProxyPass /routed-foot http://localhost:3333
+  ProxyPassReverse /routed-foot http://localhost:3333
+
+</VirtualHost>
+

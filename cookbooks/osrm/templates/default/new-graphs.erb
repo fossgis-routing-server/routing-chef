@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -eu
+
+SCRIPTNAME=osrm/$(basename $0)
+LOGGING_CMD="logger -i -t $SCRIPTNAME -p daemon.warning --"
+LOGGING_ERR="logger -i -t $SCRIPTNAME -p daemon.err --"
+LOGGING_CRIT="logger -i -t $SCRIPTNAME -p daemon.crit --"
+LOGGING_INFO="logger -i -t $SCRIPTNAME -p daemon.info --"
+LOGGING_NOTICE="logger -i -t $SCRIPTNAME -p daemon.notice --"
+
+for PROFILE in <%= @profiles %>;
+do
+    if [ -f <%= @basedir %>/build/${PROFILE}.copying_finished ]
+    then
+        date_copied=$(date -f <%= @basedir %>/build/${PROFILE}.copying_finished '+%s')
+        if [ -f <%= @basedir %>/data/${PROFILE}.copying_finished ]
+        then
+            date_running=$(date -f <%= @basedir %>/data/${PROFILE}.copying_finished '+%s')
+            $LOGGING_INFO compare dates. Running: $(< <%= @basedir %>/data/${PROFILE}.copying_finished) $date_running \
+                copied: $(< <%= @basedir %>/build/${PROFILE}.copying_finished) $date_copied
+        else
+            date_running=0
+            $LOGGING_INFO No data yet, copy
+        fi
+
+        if [ $date_running -lt $date_copied ]
+        then
+            systemctl stop osrm-routed-${PROFILE}.service || echo "osrm-routed-${PROFILE}.service was not started"
+            cp -lf <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
+            systemctl start osrm-routed-${PROFILE}.service
+        fi
+    fi
+done

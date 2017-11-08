@@ -1,0 +1,27 @@
+# File maintained by Chef. Do not edit.
+# active routing profiles to compile and load
+PROFILES="<%= @profile %>"
+
+# path to OSRM software
+OSRMPATH=<%= @basedir %>/osrm-backend/build
+
+# extract to use
+OSMDATA=<%= @osmdata %>
+
+# build path
+BUILDDIR=<%= @basedir %>/build
+
+# directory for storing compiled profiles
+DATADIR=<%= @basedir %>/data
+
+# number of threads to use
+SERVERTHREADS=6
+
+# IP address to listen to
+SERVERADDRESS=127.0.0.1
+# first port number to use, further servers use subsequent ones
+SERVERPORT=<% @port %>
+
+# directory for server log files
+LOGDIR=/var/log/osrm
+

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+set -eu
+
+SCRIPTNAME=osrm/$(basename $0)
+LOGGING_CMD="logger -i -t $SCRIPTNAME -p daemon.warning --"
+LOGGING_ERR="logger -i -t $SCRIPTNAME -p daemon.err --"
+LOGGING_CRIT="logger -i -t $SCRIPTNAME -p daemon.crit --"
+LOGGING_INFO="logger -i -t $SCRIPTNAME -p daemon.info --"
+LOGGING_NOTICE="logger -i -t $SCRIPTNAME -p daemon.notice --"
+
+DESTINATION_HOST=routing2.openstreetmap.de
+
+for PROFILE in <%= @profiles %>
+do
+
+    cd $(dirname <%= @osmdata %>)
+    export PYTHONPATH=<%= @basedir %>/pyosmium/build/lib.linux-x86_64-3.5/
+    $LOGGING_INFO starting pyosmium-up-to-date -v <%= @osmdata %>
+    python3 <%= @basedir %>/pyosmium/build/scripts-3.5/pyosmium-up-to-date \
+      -s 10000 -v <%= @osmdata %> | $LOGGING_INFO
+    $LOGGING_INFO finished updating planet
+
+    cd <%= @basedir %>/cbf-routing-profiles/
+    $LOGGING_INFO starting compile_profiles
+    ./compile_profiles.sh profile-${PROFILE}.conf 2>&1 | $LOGGING_INFO
+    rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+    cp -l <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
+
+
+    # copy graph to serving machine
+    COUNT=1
+    while [ "$COUNT" -le 3 ]
+    do
+        ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILE}.copying_finished"
+        rsync -W <%= @basedir %>/build/${PROFILE}* osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
+        COUNT=$((COUNT+1))
+    done
+
+    if [ "$COUNT" -gt 1 ]
+    then
+        if [ "$COUNT" -gt 3 ]
+        then
+            $LOGGING_CMD "Failed to copy the graph of profile $PROFILE to $DESTINATION_HOST:<%= @basedir %>/build/"
+            exit 1
+        else
+            $LOGGING_NOTICE "Needed $COUNT attempts to copy the graph of profile $PROFILE to $DESTINATION_HOST:<%= @basedir %>/build/"
+        fi
+    fi
+
+    # create a timestamp file on the destination machine
+    date -Is > <%= @basedir %>/build/${PROFILE}.copying_finished
+    rsync -W <%= @basedir %>/build/${PROFILE}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
+    $LOGGING_INFO "copying graph $DESTINATION_HOST finished"
+
+done
+
+
