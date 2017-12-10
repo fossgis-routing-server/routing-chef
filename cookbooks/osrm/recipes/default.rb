@@ -63,6 +63,9 @@ package "python3-setuptools"
 package "munin-node"
 package "munin"
 package "smartmontools"
+package "libwww-perl"
+package "libcgi-fast-perl"
+package "libapache2-mod-fcgid"
 
 directory "#{basedir}" do
     user  "osrm"

@@ -13,7 +13,6 @@ default_attributes(
         :plugin => {
             :list =>
             [
-                ["cpuspeed",""],
                 ["munin_stats",""],
                 ["smart_","sda"],
                 ["smart_","sdb"],
