@@ -116,7 +116,7 @@ if !node[:osrm][:preprocess]
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/datendelphin/osrm-frontend.git"
-    revision "cc2f831562306cac8c22b68b96cb72200f58fd4d"
+    revision "757ad723695144b98d790ed2ffdc5418022d6f1e"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
