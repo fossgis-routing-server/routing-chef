@@ -85,7 +85,9 @@ end
 execute "compile_osrm" do
   action :nothing
   cwd "#{basedir}/osrm-backend"
-  command "rm -rf build && mkdir -p build && cd build && CFLAGS=-fopenmp CXXFLAGS=-fopenmp cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && make"
+  # use -DCMAKE_BUILD_TYPE=RelWithDebInfo for debugging 
+  command "rm -rf build && mkdir -p build && cd build "\
+          "&& cmake -DCMAKE_BUILD_TYPE=Release .. && make -j 6"
   user "osrm"
 end
 
