@@ -20,6 +20,7 @@ default_attributes(
     },
     :osrm => {
         :preprocess => false,
+        :frontenddomain => "routing.openstreetmap.de"
     }
 )
 

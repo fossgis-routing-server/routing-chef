@@ -2,7 +2,8 @@
 # Cookbook Name:: osrm
 # Recipe:: default
 #
-# Copyright 2013, Swiss OpenStreetMap Assosication
+# Copyright 2016, Swiss OpenStreetMap Assosication
+#           2017  Michael Spreng
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@ basedir = node[:accounts][:system][:osrm][:home]
 osmdata = "#{basedir}/osmdata/osmdata.pbf"
 profiles = ["car", "bike", "foot"]
 routed_port = 3331
+frontenddomain = ""
 
 # Building OSRM (only on installation)
 package "git"
@@ -108,6 +110,9 @@ template "#{basedir}/osrm-backend/build/.stxxl" do
 end
 
 if !node[:osrm][:preprocess]
+
+  frontenddomain=node[:osrm][:frontenddomain]
+
   execute "compile_osrm_frontend" do
     action :nothing
     cwd "#{basedir}/osrm-frontend"
@@ -255,13 +260,19 @@ apache_module "proxy_http"
 apache_site "routing.openstreetmap.de" do
     template "apache.erb"
     directory "#{basedir}/osrm-frontend/"
-    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}", :munindir => "/var/cache/munin/www", :port => 80
+    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
+            :munindir => "/var/cache/munin/www", :port => 80,\
+            :preprocessor => node[:osrm][:preprocess],\
+            :maindomain => frontenddomain
 end
 
 apache_site "routing.openstreetmap.de-ssl" do
     template "apache.erb"
     directory "#{basedir}/osrm-frontend/"
-    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}", :munindir => "/var/cache/munin/www", :port => 443
+    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
+            :munindir => "/var/cache/munin/www", :port => 443,\
+            :preprocessor => node[:osrm][:preprocess],\
+            :maindomain => frontenddomain
 end
 
 

@@ -3,6 +3,7 @@
 # Recipe:: default
 #
 # Copyright 2016, Swiss OpenStreetMap Assosication
+#           2017  Michael Spreng
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +20,20 @@
 
 package "letsencrypt"
 
+if node[:osrm][:preprocess]
+    domains = "-d  #{node[:myhostname]}.#{node[:rooturl]}"
+else
+    domains = "-d  #{node[:myhostname]}.#{node[:rooturl]} -d #{node[:osrm][:frontenddomain]}"
+end
+
 execute "get_certificate" do
     user   "root"
     group  "root"
     not_if { File.directory?("/etc/letsencrypt") }
-    command "letsencrypt --non-interactive --agree-tos -m cert-rounting.openstreetmap.de@m.spreng.ch -d #{node[:myhostname]}.#{node[:rooturl]} --webroot --webroot-path #{node[:accounts][:system][:osrm][:home]}/osrm-frontend/ certonly"
+    command "letsencrypt --non-interactive --agree-tos "\
+            "-m cert-rounting.openstreetmap.de@m.spreng.ch "\
+            "#{domains} --webroot --webroot-path #{node[:accounts][:system][:osrm][:home]}"\
+            "/osrm-frontend/ certonly"
 end
 
 template "/etc/cron.d/certbot-renew" do
