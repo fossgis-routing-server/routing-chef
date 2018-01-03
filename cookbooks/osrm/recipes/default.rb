@@ -132,7 +132,7 @@ end
 
 git "#{basedir}/cbf-routing-profiles" do
   repository "git://github.com/datendelphin/cbf-routing-profiles.git"
-  revision "709d1f9a41cd5d7f82569e8c9bb31daab7e74c89"
+  revision "c5f0b8b85b0ce278a6b7422355b0d4a54ae5319f"
   user "osrm"
   group "osrm"
 end
