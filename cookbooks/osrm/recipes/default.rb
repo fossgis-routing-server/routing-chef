@@ -94,7 +94,7 @@ execute "compile_osrm" do
 end
 
 git "#{basedir}/osrm-backend" do
-  repository "git://github.com/datendelphin/osrm-backend.git"
+  repository "git://github.com/fossgis-routing-server/osrm-backend.git"
   revision "e4e5f0ac299c3a302b168344c1d932c7e0e56000"
   user "osrm"
   group "osrm"
@@ -122,7 +122,7 @@ if !node[:osrm][:preprocess]
   end
 
   git "#{basedir}/osrm-frontend" do
-    repository "git://github.com/datendelphin/osrm-frontend.git"
+    repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
     revision "757ad723695144b98d790ed2ffdc5418022d6f1e"
     user "osrm"
     group "osrm"
@@ -131,7 +131,7 @@ if !node[:osrm][:preprocess]
 end
 
 git "#{basedir}/cbf-routing-profiles" do
-  repository "git://github.com/datendelphin/cbf-routing-profiles.git"
+  repository "git://github.com/fossgis-routing-server/cbf-routing-profiles.git"
   revision "c5f0b8b85b0ce278a6b7422355b0d4a54ae5319f"
   user "osrm"
   group "osrm"
