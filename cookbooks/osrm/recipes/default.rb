@@ -256,6 +256,7 @@ end
 
 apache_module "proxy"
 apache_module "proxy_http"
+apache_module "rewrite"
 
 apache_site "routing.openstreetmap.de" do
     template "apache.erb"
