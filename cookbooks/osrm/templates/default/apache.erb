@@ -24,6 +24,39 @@
 
   CustomLog ${APACHE_LOG_DIR}/routing.access.log combined
 
+  RewriteEngine On
+
+  ## Rewriting url for DE browser
+  RewriteCond %{HTTP:Accept-Language} ^de [NC]
+  RewriteRule ^/$ /?hl=de [QSA,L,R]
+
+  ## Rewriting url for EN browser
+  RewriteCond %{HTTP:Accept-Language} ^en [NC]
+  RewriteRule ^/$ /?hl=en [QSA,L,R]
+
+  ## Rewriting url for ES browser
+  RewriteCond %{HTTP:Accept-Language} ^es [NC]
+  RewriteRule ^/$ /?hl=es [QSA,L,R]
+
+  ## Rewriting url for FR browser
+  RewriteCond %{HTTP:Accept-Language} ^fr [NC]
+  RewriteRule ^/$ /?hl=fr [QSA,L,R]
+
+  ## Rewriting url for RU browser
+  RewriteCond %{HTTP:Accept-Language} ^ru [NC]
+  RewriteRule ^/$ /?hl=ru [QSA,L,R]
+
+  ## Rewriting url for SV browser
+  RewriteCond %{HTTP:Accept-Language} ^sv [NC]
+  RewriteRule ^/$ /?hl=sv [QSA,L,R]
+
+  ## Rewriting url for VI browser
+  RewriteCond %{HTTP:Accept-Language} ^vi [NC]
+  RewriteRule ^/$ /?hl=vi [QSA,L,R]
+
+  ## Rewriting url for ZH browser
+  RewriteCond %{HTTP:Accept-Language} ^zh [NC]
+  RewriteRule ^/$ /?hl=zh [QSA,L,R]
 
   DocumentRoot <%= @directory %>
   <Directory <%= @directory %>>
