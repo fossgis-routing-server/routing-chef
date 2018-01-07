@@ -26,6 +26,7 @@ osmdata = "#{basedir}/osmdata/osmdata.pbf"
 profiles = ["car", "bike", "foot"]
 routed_port = 3331
 frontenddomain = ""
+website_dir = "/var/www/routing"
 
 # Building OSRM (only on installation)
 package "git"
@@ -69,6 +70,9 @@ package "libwww-perl"
 package "libcgi-fast-perl"
 package "libapache2-mod-fcgid"
 
+# about page
+package "python-markdown"
+
 directory "#{basedir}" do
     user  "osrm"
     group "osrm"
@@ -109,6 +113,11 @@ template "#{basedir}/osrm-backend/build/.stxxl" do
   variables :basedir => basedir
 end
 
+directory website_dir do
+    user  "osrm"
+    group "osrm"
+end
+
 if !node[:osrm][:preprocess]
 
   frontenddomain=node[:osrm][:frontenddomain]
@@ -117,16 +126,41 @@ if !node[:osrm][:preprocess]
     action :nothing
     cwd "#{basedir}/osrm-frontend"
     environment 'HOME' => "#{basedir}/osrm-frontend"
-    command "npm install && npm run build"
+    command "npm install && npm run build && "\
+        "cp -r css fonts images bundle.js bundle.js.map "\
+        "bundle.raw.js index.html #{website_dir}"
     user "osrm"
   end
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "757ad723695144b98d790ed2ffdc5418022d6f1e"
+    revision "388e81f166341c61006ae22bc2872e1f475485de"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
+  end
+
+  directory "#{basedir}/about/" do
+      user  "osrm"
+      group "osrm"
+  end
+
+  # about page
+
+  cookbook_file "#{basedir}/about/about.md" do
+    source "about.md"
+    user "osrm"
+    notifies :run, "execute[create_about_page]"
+  end
+
+  execute "create_about_page" do
+    action :nothing
+    cwd "#{basedir}/about"
+    command "echo '<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"\
+        "<title>About #{frontenddomain}</title></head><body>' > #{website_dir}/about.html && "\
+        "markdown_py about.md -o html5 >> #{website_dir}/about.html && "\
+        "echo '</body></html>' >> #{website_dir}/about.html"
+    user "osrm"
   end
 end
 
@@ -260,7 +294,7 @@ apache_module "rewrite"
 
 apache_site "routing.openstreetmap.de" do
     template "apache.erb"
-    directory "#{basedir}/osrm-frontend/"
+    directory website_dir
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 80,\
             :preprocessor => node[:osrm][:preprocess],\
@@ -269,7 +303,7 @@ end
 
 apache_site "routing.openstreetmap.de-ssl" do
     template "apache.erb"
-    directory "#{basedir}/osrm-frontend/"
+    directory website_dir
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 443,\
             :preprocessor => node[:osrm][:preprocess],\
