@@ -23,7 +23,10 @@ do
 
     if [ -f <%= @basedir %>/extract/$PROFILE.geojson ]
     then
-        
+        <%= @basedir %>/osmium-tool/build/osmium extract \
+            -p <%= @basedir %>/extract/$PROFILE.geojson osmdata.pbf -o $PROFILE.pbf | $LOGGING_INFO
+    else
+        ln -f osmdata.pbf $PROFILE.pbf | $LOGGING_ERR
     fi
 
     cd <%= @basedir %>/cbf-routing-profiles/

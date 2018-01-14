@@ -267,7 +267,8 @@ for profile in profiles do
     source "profiles.erb"
     user   "osrm"
     group  "osrm"
-    variables :basedir => basedir, :osmdata => osmdata, :profile => profile, :port => current_port
+    variables :basedir => basedir, :osmdata => "#{basedir}/osmdata/#{profile}.pbf", \
+        :profile => profile, :port => current_port
   end
 
   template "/etc/systemd/system/osrm-routed-#{profile}.service" do
