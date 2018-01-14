@@ -21,6 +21,11 @@ do
       -s 10000 -v <%= @osmdata %> | $LOGGING_INFO
     $LOGGING_INFO finished updating planet
 
+    if [ -f <%= @basedir %>/extract/$PROFILE.geojson ]
+    then
+        
+    fi
+
     cd <%= @basedir %>/cbf-routing-profiles/
     $LOGGING_INFO starting compile_profiles
     ./compile_profiles.sh profile-${PROFILE}.conf 2>&1 | $LOGGING_INFO

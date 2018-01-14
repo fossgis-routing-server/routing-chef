@@ -83,6 +83,11 @@ directory "#{basedir}/data" do
   group "osrm"
 end
 
+directory "#{basedir}/extract" do
+  owner "root"
+  group "root"
+end
+
 directory "#{basedir}/scripts" do
   owner "root"
   group "root"
@@ -207,6 +212,21 @@ if node[:osrm][:preprocess]
     group "osrm"
   end
 
+  execute "compile_osmium-tool" do
+    action :nothing
+    cwd "#{basedir}/osmium-tool"
+    command "rm -f build; mkdir build && cd build && cmake .. && make -j 8"
+    user "osrm"
+  end
+
+  git "#{basedir}/osmium-tool" do
+    repository "https://github.com/osmcode/osmium-tool.git"
+    revision "v1.7.1"
+    user "osrm"
+    group "osrm"
+    notifies :run, "execute[compile_osmium-tool]", :immediately
+  end
+
   template "#{basedir}/scripts/build-graphs.sh" do
     source "build-graphs.erb"
     mode 0755
@@ -235,7 +255,10 @@ else
 
 end
 
-
+cookbook_file "#{basedir}/extract/bike.geojson" do
+  source "eurasien.geojson"
+  user "root"
+end
 
 
 current_port = routed_port
