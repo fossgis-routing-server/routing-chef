@@ -152,6 +152,14 @@ if !node[:osrm][:preprocess]
 
   # about page
 
+  git "#{basedir}/about/splendor/" do
+    repository "https://github.com/markdowncss/splendor.git"
+    revision "40db29539e4e8c733dec7f941833dcc21ed60504"
+    user "osrm"
+    notifies :run, "execute[create_about_page]"
+  end
+
+
   cookbook_file "#{basedir}/about/about.md" do
     source "about.md"
     user "osrm"
@@ -161,8 +169,11 @@ if !node[:osrm][:preprocess]
   execute "create_about_page" do
     action :nothing
     cwd "#{basedir}/about"
-    command "echo '<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"\
-        "<title>About #{frontenddomain}</title></head><body>' > #{website_dir}/about.html && "\
+    command "cp splendor/css/splendor.css #{website_dir}/splendor.css && "\
+        "echo '<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"\
+        "<title>About #{frontenddomain}</title>"\
+        "<link rel=\"stylesheet\" href=\"splendor.css\">"\
+        "</head><body>' > #{website_dir}/about.html && "\
         "markdown_py about.md -o html5 >> #{website_dir}/about.html && "\
         "echo '</body></html>' >> #{website_dir}/about.html"
     user "osrm"

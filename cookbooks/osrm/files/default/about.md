@@ -23,6 +23,8 @@ There are two servers, one is continuously preparing the routing graph
 and fetching the most recent OpenStreetMap data, while  the other is
 serving routes from the precalculated graphs.
 
+The two servers both have 6 cores and 256GB ram.
+
 ## Used software
 
 Most software running on the servers is available as open source.
@@ -45,3 +47,8 @@ The routing profiles used for these servers. They differ
 from the profiles included with the OSRM-backend sources,
 especially the bike and foot profiles.
 
+* car: worldwide
+* bike: only Europe and Asia
+* foot: worldwide
+
+The limitation of the bike profile is due to a lack of sufficient ram.
