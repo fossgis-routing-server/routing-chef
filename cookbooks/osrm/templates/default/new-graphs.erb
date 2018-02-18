@@ -31,4 +31,12 @@ do
             systemctl start osrm-routed-${PROFILE}.service
         fi
     fi
+
+    TIMESTAMP_FILE=<%= @basedir %>/data/${PROFILE}.data_timestamp
+    if [ -f $TIMESTAMP_FILE ]
+    then
+    sed -i src/leaflet_options.js \
+        -e "s/label: 'Car',.*\$/label: 'Car', timestamp: '$(cat $TIMESTAMP_FILE)',/" | $LOGGING_ERR
+    fi
+
 done

@@ -32,6 +32,9 @@ do
     cd <%= @basedir %>/cbf-routing-profiles/
     $LOGGING_INFO starting compile_profiles
     ./compile_profiles.sh profile-${PROFILE}.conf 2>&1 | $LOGGING_INFO
+    <%= @basedir %>/osmium-tool/build/osmium fileinfo  <%= @basedir %>/build/$PROFILE.pbf \
+        -g header.option.osmosis_replication_timestamp \
+        > <%= @basedir %>/build/${PROFILE}.data_timestamp | $LOGGING_ERR
     rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
     cp -l <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
 
@@ -41,7 +44,9 @@ do
     while [ "$COUNT" -le 3 ]
     do
         ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILE}.copying_finished"
-        rsync -W <%= @basedir %>/build/${PROFILE}* osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
+        rsync -W --exclude *.pbf \
+            <%= @basedir %>/build/${PROFILE}.[cdo]* \
+            osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
         COUNT=$((COUNT+1))
     done
 
