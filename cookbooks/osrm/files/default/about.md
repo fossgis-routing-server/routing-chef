@@ -41,7 +41,7 @@ Currently running v5.14.1
 * The frontend was hacked to include a profile switch (car, bike and foot)
 * Includes the configuration of background layers and routing engine URLs
 
-### [rounting profiles](https://github.com/fossgis-routing-server/cbf-routing-profiles)
+### [routing profiles](https://github.com/fossgis-routing-server/cbf-routing-profiles)
 
 The routing profiles used for these servers. They differ
 from the profiles included with the OSRM-backend sources,
