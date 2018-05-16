@@ -1,0 +1,23 @@
+[modes]
+modes: ["car", "bike", "foot"]
+
+[car]
+servers: ["am", "eu"]
+url_am: "http://routing.openstreetmap.de/routed-car/route/v1/driving/"
+url_eu: "http://routing.openstreetmap.de/routed-bike/route/v1/driving/"
+polygon_am: None
+polygon_eu: <%= @polyeu %>
+
+[bike]
+servers: ["am", "eu"]
+url_am: "http://routing.openstreetmap.de/routed-car/route/v1/driving/"
+url_eu: "http://routing.openstreetmap.de/routed-car/route/v1/driving/"
+polygon_am: None
+polygon_eu: <%= @polyeu %>
+
+[foot]
+servers: ["am", "eu"]
+url_am: "http://routing.openstreetmap.de/routed-car/route/v1/driving/"
+url_eu: "http://routing.openstreetmap.de/routed-car/route/v1/driving/"
+polygon_am: None
+polygon_eu: <%= @polyeu %>

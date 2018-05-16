@@ -23,7 +23,10 @@ include_recipe "apache::ssl"
 
 basedir = node[:accounts][:system][:osrm][:home]
 osmdata = "#{basedir}/osmdata/osmdata.pbf"
-profiles = ["car", "bike", "foot"]
+profiles = ["car", "bike", "footeu", "footam"]
+polyeu = "[[-1.09898437500, 90], [-12.52476562500, 71.10265660445], [-35.02476562500, 62.06289796703], [-46.80210937500, 17.05712070850], [-30.45445312500, -3.07434401590], [0.83460937500, -90], [180, -90], [180, 90], [-1.09898437500, 90]]"
+polyam = "[[-1.09898437500,90],[-12.52476562500,71.10265660445],[-35.02476562500,62.06289796703],[-46.80210937500,17.05712070850],[-30.45445312500,-3.07434401590],[0.83460937500,-90],[-180,-90],[-180,90],[-1.09898437500,90]]"
+
 routed_port = 3331
 frontenddomain = ""
 website_dir = "/var/www/routing"
@@ -187,6 +190,14 @@ git "#{basedir}/cbf-routing-profiles" do
   group "osrm"
 end
 
+execute "link_main_profile" do
+  cwd "#{basedir}/cbf-routing-profiles"
+  command "ln -sf foot.lua footeu.lua &&
+  ln -sf foot.lua footam.lua"
+  user "osrm"
+end
+
+
 # planet
 if node[:osrm][:preprocess]
   directory "#{basedir}/osmdata" do
@@ -266,9 +277,22 @@ else
 
 end
 
-cookbook_file "#{basedir}/extract/bike.geojson" do
-  source "eurasien.geojson"
+template "#{basedir}/extract/footam.geojson" do
+  source "poly.geojson.erb"
   user "root"
+  variables :polygon => polyam
+end
+
+template "#{basedir}/extract/footeu.geojson" do
+  source "poly.geojson.erb"
+  user "root"
+  variables :polygon => polyeu
+end
+
+template "#{basedir}/extract/bike.geojson" do
+  source "poly.geojson.erb"
+  user "root"
+  variables :polygon => polyeu
 end
 
 
@@ -345,4 +369,19 @@ apache_site "routing.openstreetmap.de-ssl" do
             :maindomain => frontenddomain
 end
 
+# script for dispatching routing requests by region
+git "#{basedir}/request-by-coordinate" do
+  repository "git://github.com/fossgis-routing-server/request-by-coordinate.git"
+  revision "1822de46aa543b2478871b142448ff1447ce66c7"
+  user "osrm"
+  group "osrm"
+end
+
+template "#{basedir}/request-by-coordinate/settings.cfg" do
+  source "request-by-coordinate.cfg.erb"
+  user   "osrm"
+  group  "osrm"
+  mode 0644
+  variables :basedir => basedir
+end
 
