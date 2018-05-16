@@ -96,14 +96,20 @@
      </IfModule>
   </Location>
 
+    <Directory <%= @rbcdir %>>
+        Options FollowSymLinks SymLinksIfOwnerMatch
+        AllowOverride None
+        Require all granted
+    </Directory>
 
-  ProxyRequests Off
-  ProxyPass /routed-car http://localhost:3331
-  ProxyPassReverse /routed-car http://localhost:3331
-  ProxyPass /routed-bike http://localhost:3332
-  ProxyPassReverse /routed-bike http://localhost:3332
-  ProxyPass /routed-foot http://localhost:3333
-  ProxyPassReverse /routed-foot http://localhost:3333
+    WSGIScriptAlias /routed-car  <%= @rbcdir %>/request-by-coordinate.py/car
+    WSGIScriptAlias /routed-bike  <%= @rbcdir %>/request-by-coordinate.py/bike
+    WSGIScriptAlias /routed-foot  <%= @rbcdir %>/request-by-coordinate.py/foot
+    WSGIApplicationGroup %{SERVER}
+<% if @port == 80 -%>
+    WSGIDaemonProcess request-by-coordinate home=<%= @rbcdir %> user=osrm group=osrm processes=1 threads=10
+<% end -%>
+    WSGIProcessGroup request-by-coordinate
 
 </VirtualHost>
 

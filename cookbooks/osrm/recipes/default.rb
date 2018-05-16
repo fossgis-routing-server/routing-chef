@@ -76,6 +76,10 @@ package "libapache2-mod-fcgid"
 # about page
 package "python-markdown"
 
+# request-by-coordinate dispatch script
+package "libapache2-mod-wsgi-py3"
+package "python3-cherrypy3"
+
 directory "#{basedir}" do
     user  "osrm"
     group "osrm"
@@ -357,7 +361,8 @@ apache_site "routing.openstreetmap.de" do
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 80,\
             :preprocessor => node[:osrm][:preprocess],\
-            :maindomain => frontenddomain
+            :maindomain => frontenddomain,\
+	    :rbcdir => "#{basedir}/request-by-coordinate"
 end
 
 apache_site "routing.openstreetmap.de-ssl" do
@@ -366,13 +371,14 @@ apache_site "routing.openstreetmap.de-ssl" do
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 443,\
             :preprocessor => node[:osrm][:preprocess],\
-            :maindomain => frontenddomain
+            :maindomain => frontenddomain,\
+	    :rbcdir => "#{basedir}/request-by-coordinate"
 end
 
 # script for dispatching routing requests by region
 git "#{basedir}/request-by-coordinate" do
   repository "git://github.com/fossgis-routing-server/request-by-coordinate.git"
-  revision "1822de46aa543b2478871b142448ff1447ce66c7"
+  revision "b16204f2a36e85aac85f897488d6d90d38424dd0"
   user "osrm"
   group "osrm"
 end
@@ -382,6 +388,6 @@ template "#{basedir}/request-by-coordinate/settings.cfg" do
   user   "osrm"
   group  "osrm"
   mode 0644
-  variables :basedir => basedir
+  variables :basedir => basedir, :polyeu => polyeu, :port => routed_port
 end
 
