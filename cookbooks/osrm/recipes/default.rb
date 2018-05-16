@@ -101,7 +101,7 @@ execute "compile_osrm" do
   cwd "#{basedir}/osrm-backend"
   # use -DCMAKE_BUILD_TYPE=RelWithDebInfo for debugging 
   command "rm -rf build && mkdir -p build && cd build "\
-          "&& cmake -DCMAKE_BUILD_TYPE=Release .. && make -j 6"
+          "&& cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_STXXL=ON .. && make -j 6"
   user "osrm"
 end
 
