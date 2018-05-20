@@ -23,11 +23,19 @@ include_recipe "apache::ssl"
 
 basedir = node[:accounts][:system][:osrm][:home]
 osmdata = "#{basedir}/osmdata/osmdata.pbf"
-profiles = ["car", "bike", "footeu", "footam"]
-polyeu = "[[-1.09898437500, 90], [-12.52476562500, 71.10265660445], [-35.02476562500, 62.06289796703], [-46.80210937500, 17.05712070850], [-30.45445312500, -3.07434401590], [0.83460937500, -90], [180, -90], [180, 90], [-1.09898437500, 90]]"
-polyam = "[[-1.09898437500,90],[-12.52476562500,71.10265660445],[-35.02476562500,62.06289796703],[-46.80210937500,17.05712070850],[-30.45445312500,-3.07434401590],[0.83460937500,-90],[-180,-90],[-180,90],[-1.09898437500,90]]"
+myhost = node[:myhostname]
+profiles = node[:profiles]
+profileareas = node[:profileareas]
+thishostprofiles = []
 
-routed_port = 3331
+for profile in profileareas.keys do
+  if profileareas[profile][:host] == myhost
+    thishostprofiles.push(profile)
+  end
+end
+
+polyeu = "[[-1.09898437500, 90], [-12.52476562500, 71.10265660445], [-35.02476562500, 62.06289796703], [-46.80210937500, 17.05712070850], [-30.45445312500, -3.07434401590], [0.83460937500, -90], [180, -90], [180, 90], [-1.09898437500, 90]]"
+
 frontenddomain = ""
 website_dir = "/var/www/routing"
 
@@ -111,7 +119,7 @@ end
 
 git "#{basedir}/osrm-backend" do
   repository "git://github.com/fossgis-routing-server/osrm-backend.git"
-  revision "e4e5f0ac299c3a302b168344c1d932c7e0e56000"
+  revision "0b574f0d4b5b0abb396fdaafd7ba485314e46f6c"
   user "osrm"
   group "osrm"
   notifies :run, "execute[compile_osrm]", :immediately
@@ -194,11 +202,15 @@ git "#{basedir}/cbf-routing-profiles" do
   group "osrm"
 end
 
-execute "link_main_profile" do
-  cwd "#{basedir}/cbf-routing-profiles"
-  command "ln -sf foot.lua footeu.lua &&
-  ln -sf foot.lua footam.lua"
-  user "osrm"
+for profilemain in profiles.keys
+  for profile in profiles[profilemain]
+    if profile != profilemain
+      link "#{basedir}/cbf-routing-profiles/#{profile}.lua" do
+        to "#{basedir}/cbf-routing-profiles/#{profilemain}.lua"
+        owner 'osrm'
+      end
+    end
+  end
 end
 
 
@@ -256,7 +268,7 @@ if node[:osrm][:preprocess]
   template "#{basedir}/scripts/build-graphs.sh" do
     source "build-graphs.erb"
     mode 0755
-    variables :basedir => basedir, :osmdata => osmdata, :profiles => profiles.join(" ")
+    variables :basedir => basedir, :osmdata => osmdata, :profiles => profileareas.keys.join(" ")
   end
 
   template "/etc/systemd/system/build-graphs.service" do
@@ -268,7 +280,7 @@ else
   template "#{basedir}/scripts/new-graphs.sh" do
     source "new-graphs.erb"
     mode 0755
-    variables :basedir => basedir, :profiles => profiles.join(" ")
+    variables :basedir => basedir, :profiles => thishostprofiles.join(" ")
   end
 
   template "/etc/cron.d/new-graphs" do
@@ -281,41 +293,29 @@ else
 
 end
 
-template "#{basedir}/extract/footam.geojson" do
-  source "poly.geojson.erb"
-  user "root"
-  variables :polygon => polyam
-end
-
-template "#{basedir}/extract/footeu.geojson" do
-  source "poly.geojson.erb"
-  user "root"
-  variables :polygon => polyeu
-end
-
-template "#{basedir}/extract/bike.geojson" do
-  source "poly.geojson.erb"
-  user "root"
-  variables :polygon => polyeu
-end
-
-
-current_port = routed_port
-for profile in profiles do
+for profile in profileareas.keys do
   template "#{basedir}/cbf-routing-profiles/profile-#{profile}.conf" do
     source "profiles.erb"
     user   "osrm"
     group  "osrm"
     variables :basedir => basedir, :osmdata => "#{basedir}/osmdata/#{profile}.pbf", \
-        :profile => profile, :port => current_port
+        :profile => profile, :port => profileareas[profile][:port]
   end
 
+  if profileareas[profile][:poly]
+    template "#{basedir}/extract/#{profile}.geojson" do
+      source "poly.geojson.erb"
+      user "root"
+      variables :polygon => profileareas[profile][:poly]
+    end
+  end
+end
+
+for profile in thishostprofiles do
   template "/etc/systemd/system/osrm-routed-#{profile}.service" do
     source "systemd-osrm-routed.erb"
-    variables :basedir => basedir, :profile => profile, :port => current_port
+    variables :basedir => basedir, :profile => profile, :port => profileareas[profile][:port]
   end
-
-  current_port = current_port + 1
 end
 
 directory "/var/log/osrm" do
@@ -388,6 +388,6 @@ template "#{basedir}/request-by-coordinate/settings.cfg" do
   user   "osrm"
   group  "osrm"
   mode 0644
-  variables :basedir => basedir, :polyeu => polyeu, :port => routed_port
+  variables :basedir => basedir, :polyeu => polyeu, :port => 3331
 end
 

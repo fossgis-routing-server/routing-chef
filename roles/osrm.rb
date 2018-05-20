@@ -1,6 +1,9 @@
 name "osrm"
 description "Role for running OpenSourceRoutingMachine"
 
+polyeu = "[[-1.09898437500, 90], [-12.52476562500, 71.10265660445], [-35.02476562500, 62.06289796703], [-46.80210937500, 17.05712070850], [-30.45445312500, -3.07434401590], [0.83460937500, -90], [180, -90], [180, 90], [-1.09898437500, 90]]"
+polyam = "[[-1.09898437500,90],[-12.52476562500,71.10265660445],[-35.02476562500,62.06289796703],[-46.80210937500,17.05712070850],[-30.45445312500,-3.07434401590],[0.83460937500,-90],[-180,-90],[-180,90],[-1.09898437500,90]]"
+
 default_attributes(
     :accounts => {
         :system => {
@@ -20,6 +23,38 @@ default_attributes(
                 ["apache_processes",""],
                 ["apache_volume",""],
             ]
+        }
+    },
+    :profiles => {
+        "car" => ["car"],
+        "bike" => ["bikeam", "bikeeu"],
+        "foot" => ["footam", "footeu"]
+    },
+    :profileareas => {
+        "car" => {
+                :host => "routing2",
+                :poly => nil,
+                :port => 3331
+        },
+        "bikeeu" => {
+                :host => "routing2",
+                :poly => polyeu,
+                :port => 3332
+        },
+        "bikeam" => {
+                :host => "routing1",
+                :poly => polyam,
+                :port => 3333
+        },
+        "footeu" => {
+                :host => "routing2",
+                :poly => polyeu,
+                :port => 3334
+        },
+        "footam" => {
+                :host => "routing2",
+                :poly => polyam,
+                :port => 3335
         }
     }
 )
