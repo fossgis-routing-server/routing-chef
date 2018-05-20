@@ -388,6 +388,8 @@ template "#{basedir}/request-by-coordinate/settings.cfg" do
   user   "osrm"
   group  "osrm"
   mode 0644
-  variables :basedir => basedir, :polyeu => polyeu, :port => 3331
+  variables :basedir => basedir, :modes => profiles.keys,\
+            :moderegs =>profiles, :modeprops => profileareas,\
+            :polyeu => polyeu, :port => 3331
 end
 

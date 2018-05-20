@@ -1,21 +1,14 @@
 [modes]
-modes: ["car", "bike", "foot"]
+modes: ["<%= @modes.join("\", \"") %>"]
 
-[car]
-servers: ["w"]
-url_w: "http://localhost:<%= @port %>/route/v1/driving/"
-polygon_w: None
+<% @modes.each do |mode| -%>
+[<%= mode %>]
+servers: ["<%= @moderegs[mode].join("\", \"") %>"]
+<% first = true %>
+<% @moderegs[mode].each do |modereg| -%>
+url_<%= modereg %>: "http://<%= @modeprops[modereg][:host] %>:<%= @modeprops[modereg][:port] %>/route/v1/driving/"
+polygon_<%= modereg %>: <%= first ? "None" : @modeprops[modereg][:poly] %>
+<% first = false %>
+<% end -%>
 
-[bike]
-servers: ["am", "eu"]
-url_eu: "http://localhost:<%= @port + 1 %>/route/v1/driving/"
-url_am: "http://localhost:<%= @port + 1 %>/route/v1/driving/"
-polygon_am: None
-polygon_eu: <%= @polyeu %>
-
-[foot]
-servers: ["am", "eu"]
-url_eu: "http://localhost:<%= @port + 2 %>/route/v1/driving/"
-url_am: "http://localhost:<%= @port + 3 %>/route/v1/driving/"
-polygon_am: None
-polygon_eu: <%= @polyeu %>
+<% end -%>

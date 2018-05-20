@@ -8,7 +8,7 @@ After=syslog.target network.target
 Type=simple
 User=osrm
 Group=osrm
-ExecStart=<%= @basedir %>/osrm-backend/build/osrm-routed --algorithm=MLD -i 127.0.0.1 -p <%= @port %> -t 6 <%= @basedir %>/data/<%= @profile %>.osrm
+ExecStart=<%= @basedir %>/osrm-backend/build/osrm-routed --algorithm=MLD -p <%= @port %> -t 6 <%= @basedir %>/data/<%= @profile %>.osrm
 
 [Install]
 WantedBy=multi-user.target

@@ -27,8 +27,8 @@ default_attributes(
     },
     :profiles => {
         "car" => ["car"],
-        "bike" => ["bikeam", "bikeeu"],
-        "foot" => ["footam", "footeu"]
+        "bike" => ["bikeeu", "bikeam"],
+        "foot" => ["footeu", "footam"]
     },
     :profileareas => {
         "car" => {
