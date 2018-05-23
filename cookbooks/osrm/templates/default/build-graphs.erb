@@ -36,8 +36,23 @@ do
     <%= @basedir %>/osmium-tool/build/osmium fileinfo  <%= @basedir %>/build/$PROFILE.pbf \
         -g header.option.osmosis_replication_timestamp \
         > <%= @basedir %>/build/${PROFILE}.data_timestamp | $LOGGING_ERR
-    rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+        rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+    case $PROFILE in
+    <% @thishostprofiles.each do |profile| -%>
+        <%= profile %>)
+            systemctl stop osrm-routed-<%= profile %>.service || \
+            echo "osrm-routed-<%= profile %>.service was not started" | $LOGGING_INFO
+            ;;
+    <% end -%>
+    esac
     cp -l <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
+    case $PROFILE in
+    <% @thishostprofiles.each do |profile| -%>
+        <%= profile %>)
+            systemctl start osrm-routed-<%= profile %>.service | $LOGGING_INFO
+            ;;
+    <% end -%>
+    esac
 
 
     # copy graph to serving machine

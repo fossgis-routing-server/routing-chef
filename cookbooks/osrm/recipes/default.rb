@@ -268,7 +268,17 @@ if node[:osrm][:preprocess]
   template "#{basedir}/scripts/build-graphs.sh" do
     source "build-graphs.erb"
     mode 0755
-    variables :basedir => basedir, :osmdata => osmdata, :profiles => profileareas.keys.join(" ")
+    variables :basedir => basedir, :osmdata => osmdata,\
+	    :profiles => profileareas.keys.join(" "),\
+	    :thishostprofiles => thishostprofiles
+  end
+
+  template "/etc/sudoers.d/osrm" do
+    source "sudoers-osrm.erb"
+    mode 0440
+    user "root"
+    group "root"
+    variables :modes => thishostprofiles
   end
 
   template "/etc/systemd/system/build-graphs.service" do

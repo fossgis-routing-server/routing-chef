@@ -1,0 +1,4 @@
+<% @modes.each do |mode| -%>
+osrm ALL=(ALL) NOPASSWD: /bin/systemctl stop osrm-routed-<%= mode %>.service
+osrm ALL=(ALL) NOPASSWD: /bin/systemctl start osrm-routed-<%= mode %>.service
+<% end -%>
