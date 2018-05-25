@@ -55,7 +55,6 @@ from the profiles included with the OSRM-backend sources,
 especially the bike and foot profiles.
 
 * car: worldwide
-* bike: only Europe and Asia
+* bike: worldwide
 * foot: worldwide
 
-The limitation of the bike profile is due to a lack of sufficient ram.
