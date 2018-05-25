@@ -34,8 +34,6 @@ for profile in profileareas.keys do
   end
 end
 
-polyeu = "[[-1.09898437500, 90], [-12.52476562500, 71.10265660445], [-35.02476562500, 62.06289796703], [-46.80210937500, 17.05712070850], [-30.45445312500, -3.07434401590], [0.83460937500, -90], [180, -90], [180, 90], [-1.09898437500, 90]]"
-
 frontenddomain = ""
 website_dir = "/var/www/routing"
 
@@ -399,7 +397,6 @@ template "#{basedir}/request-by-coordinate/settings.cfg" do
   group  "osrm"
   mode 0644
   variables :basedir => basedir, :modes => profiles.keys,\
-            :moderegs =>profiles, :modeprops => profileareas,\
-            :polyeu => polyeu, :port => 3331
+            :moderegs =>profiles, :modeprops => profileareas
 end
 
