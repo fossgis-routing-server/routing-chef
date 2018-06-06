@@ -117,7 +117,7 @@ end
 
 git "#{basedir}/osrm-backend" do
   repository "git://github.com/fossgis-routing-server/osrm-backend.git"
-  revision "0b574f0d4b5b0abb396fdaafd7ba485314e46f6c"
+  revision "74e7f7279b1e516910d6381091f02f45c19f7efd"
   user "osrm"
   group "osrm"
   notifies :run, "execute[compile_osrm]", :immediately
@@ -195,7 +195,7 @@ end
 
 git "#{basedir}/cbf-routing-profiles" do
   repository "git://github.com/fossgis-routing-server/cbf-routing-profiles.git"
-  revision "25ff4d6ffa030765a6d86c508011924847a0869e"
+  revision "92454eb418b37228c47f203bba6437f653140d01"
   user "osrm"
   group "osrm"
 end
