@@ -146,13 +146,13 @@ if !node[:osrm][:preprocess]
     environment 'HOME' => "#{basedir}/osrm-frontend"
     command "npm install && npm run build && "\
         "cp -r css fonts images bundle.js bundle.js.map "\
-        "bundle.raw.js index.html #{website_dir}"
+        "bundle.raw.js index.html debug #{website_dir}"
     user "osrm"
   end
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "cc2742fd0009586a028a90dd21f6c516ad80c955"
+    revision "957d8083186f34b799e8bb0b2cdee273d7f74165"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
