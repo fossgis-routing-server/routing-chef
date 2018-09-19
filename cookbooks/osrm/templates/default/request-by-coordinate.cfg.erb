@@ -9,7 +9,7 @@ modes: ["<%= @modes.join("\", \"") %>"]
 servers: ["<%= @moderegs[mode].join("\", \"") %>"]
 <% first = true %>
 <% @moderegs[mode].each do |modereg| -%>
-url_<%= modereg %>: "http://<%= @modeprops[modereg][:host] %>:<%= @modeprops[modereg][:port] %>/route/v1/driving/"
+url_<%= modereg %>: "http://<%= @modeprops[modereg][:host] %>:<%= @modeprops[modereg][:port] %>"
 polygon_<%= modereg %>: <%= first ? "None" : @modeprops[modereg][:poly] %>
 <% first = false %>
 <% end -%>

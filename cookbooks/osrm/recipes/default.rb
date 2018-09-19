@@ -152,7 +152,7 @@ if !node[:osrm][:preprocess]
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "957d8083186f34b799e8bb0b2cdee273d7f74165"
+    revision "81075344a6d33680f2ecc666932a277cfe539726"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
@@ -386,7 +386,7 @@ end
 # script for dispatching routing requests by region
 git "#{basedir}/request-by-coordinate" do
   repository "git://github.com/fossgis-routing-server/request-by-coordinate.git"
-  revision "c3bafac61da1f6bfc65f8ac9f13b21403fc362a2"
+  revision "e69f74299196a0f5fa80f125ed90000bb8fe8c61"
   user "osrm"
   group "osrm"
 end
