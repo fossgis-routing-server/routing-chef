@@ -83,7 +83,7 @@ end
 
 git "#{basedir}/software/protozero" do
   action :sync
-  repository "git://github.com/osmcode/protozero.git"
+  repository "git://github.com/mapbox/protozero.git"
   revision "v1.6.4"
   user "export"
   group "export"

@@ -28,4 +28,5 @@ run_list(
     "recipe[accounts]",
     "role[osrm]",
     "role[letsencrypt]",
+    "role[export]",
 )

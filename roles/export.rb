@@ -7,6 +7,8 @@ default_attributes(
       :jochen => {
         :status => :administrator
       },
+    },
+    :system => {
       :export => {
         :status => :role,
         :members => [:jochen]
