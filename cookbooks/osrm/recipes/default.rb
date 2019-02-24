@@ -152,7 +152,7 @@ if !node[:osrm][:preprocess]
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "81075344a6d33680f2ecc666932a277cfe539726"
+    revision "d58f04d2428d5cded3d51223164374ee9cbcdab2"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
@@ -195,7 +195,7 @@ end
 
 git "#{basedir}/cbf-routing-profiles" do
   repository "git://github.com/fossgis-routing-server/cbf-routing-profiles.git"
-  revision "a53ffa371066315fa09d31807b725afab8e3b5b8"
+  revision "5f800608f586b8627e42ac7528d1a9106eb2d64b"
   user "osrm"
   group "osrm"
 end
