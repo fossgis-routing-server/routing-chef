@@ -52,7 +52,7 @@ default_attributes(
                 :port => 3334
         },
         "footam" => {
-                :host => "routing2",
+                :host => "routing1",
                 :poly => polyam,
                 :port => 3335
         }
