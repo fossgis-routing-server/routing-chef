@@ -26,14 +26,19 @@ default_attributes(
         }
     },
     :profiles => {
-        "car" => ["car"],
+        "car" =>  ["careu",  "caram"],
         "bike" => ["bikeeu", "bikeam"],
         "foot" => ["footeu", "footam"]
     },
     :profileareas => {
-        "car" => {
+        "careu" => {
                 :host => "routing2",
-                :poly => nil,
+                :poly => polyeu,
+                :port => 3330
+        },
+        "caram" => {
+                :host => "routing1",
+                :poly => polyam,
                 :port => 3331
         },
         "bikeeu" => {
@@ -52,7 +57,7 @@ default_attributes(
                 :port => 3334
         },
         "footam" => {
-                :host => "routing1",
+                :host => "routing2",
                 :poly => polyam,
                 :port => 3335
         }
