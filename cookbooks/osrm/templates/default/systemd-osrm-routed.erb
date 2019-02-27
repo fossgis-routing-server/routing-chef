@@ -9,6 +9,8 @@ Type=simple
 User=osrm
 Group=osrm
 ExecStart=<%= @basedir %>/osrm-backend/build/osrm-routed --algorithm=MLD -p <%= @port %> -t 6 <%= @basedir %>/data/<%= @profile %>.osrm
+Restart=always
+RestartSec=700
 
 [Install]
 WantedBy=multi-user.target
