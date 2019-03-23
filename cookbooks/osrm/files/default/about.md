@@ -25,13 +25,6 @@ in the server log file. Please see
 [Datenschutzerklärung](https://www.fossgis.de/datenschutzerklaerung)
 for more information on privacy.
 
-## Privacy
-Your request for a route is sent to our server (because the route is
-calculated on the server and only displayed in your browser) and is saved
-in the server log file. Please see
-[Datenschutzerklärung](https://www.fossgis.de/datenschutzerklaerung)
-for more information on privacy.
-
 ## General setup
 There are two servers, one is continuously preparing the routing graph
 and fetching the most recent OpenStreetMap data, while  the other is
