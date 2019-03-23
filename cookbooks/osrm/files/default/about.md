@@ -58,3 +58,7 @@ especially the bike and foot profiles.
 * bike: worldwide
 * foot: worldwide
 
+### [Server configuration](https://github.com/fossgis-routing-server/routing-chef/)
+
+The server configuration is available as [chef](https://www.chef.sh/) scripts in a github repository, too. 
+There you can also find auxiliary files like this [page](https://github.com/fossgis-routing-server/routing-chef/blob/master/cookbooks/osrm/files/default/about.md).
