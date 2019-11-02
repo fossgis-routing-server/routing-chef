@@ -29,9 +29,9 @@ end
 execute "get_certificate" do
     user   "root"
     group  "root"
-    not_if { File.directory?("/etc/letsencrypt") }
+    not_if { File.directory?("/etc/letsencrypt/live") }
     command "letsencrypt --non-interactive --agree-tos "\
-            "-m cert-rounting.openstreetmap.de@m.spreng.ch "\
+            "-m fossgis-routing-server@openstreetmap.de "\
             "#{domains} --webroot --webroot-path #{node[:accounts][:system][:osrm][:home]}"\
             "/osrm-frontend/ certonly"
 end
