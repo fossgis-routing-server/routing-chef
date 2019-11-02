@@ -29,11 +29,12 @@ end
 execute "get_certificate" do
     user   "root"
     group  "root"
+    # execute this to bootstrap letsencrypt, if this is the first run.
+    # uses standalone mode, must run before apache is started! (apache needs the cert, so should come later)
     not_if { File.directory?("/etc/letsencrypt/live") }
     command "letsencrypt --non-interactive --agree-tos "\
             "-m fossgis-routing-server@openstreetmap.de "\
-            "#{domains} --webroot --webroot-path #{node[:accounts][:system][:osrm][:home]}"\
-            "/osrm-frontend/ certonly"
+            "#{domains} --standalone certonly"
 end
 
 template "/etc/cron.d/certbot-renew" do
@@ -41,4 +42,5 @@ template "/etc/cron.d/certbot-renew" do
     user   "root"
     group  "root"
     mode   "0644"
+    variables :webrootpath => "#{node[:accounts][:system][:osrm][:home]}/osrm-frontend/"
 end
