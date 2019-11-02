@@ -20,10 +20,10 @@
 
 package "letsencrypt"
 
-if node[:osrm][:preprocess]
-    domains = "-d  #{node[:myhostname]}.#{node[:rooturl]}"
-else
+if node[:osrm][:runfrontend]
     domains = "-d  #{node[:myhostname]}.#{node[:rooturl]} -d #{node[:osrm][:frontenddomain]}"
+else
+    domains = "-d  #{node[:myhostname]}.#{node[:rooturl]}"
 end
 
 execute "get_certificate" do

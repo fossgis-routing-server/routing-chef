@@ -136,7 +136,7 @@ directory website_dir do
     group "osrm"
 end
 
-if !node[:osrm][:preprocess]
+if node[:osrm][:runfrontend]
 
   frontenddomain=node[:osrm][:frontenddomain]
 
@@ -368,7 +368,7 @@ apache_site "routing.openstreetmap.de" do
     directory website_dir
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 80,\
-            :preprocessor => node[:osrm][:preprocess],\
+            :runfrontend => node[:osrm][:runfrontend],\
             :maindomain => frontenddomain,\
 	    :rbcdir => "#{basedir}/request-by-coordinate"
 end
@@ -378,7 +378,7 @@ apache_site "routing.openstreetmap.de-ssl" do
     directory website_dir
     variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
             :munindir => "/var/cache/munin/www", :port => 443,\
-            :preprocessor => node[:osrm][:preprocess],\
+            :runfrontend => node[:osrm][:runfrontend],\
             :maindomain => frontenddomain,\
 	    :rbcdir => "#{basedir}/request-by-coordinate"
 end

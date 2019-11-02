@@ -15,7 +15,8 @@ default_attributes(
         }
     },
     :osrm => {
-        :preprocess => false
+        :preprocess => false,
+        :runfrontend => false
     }
 )
 

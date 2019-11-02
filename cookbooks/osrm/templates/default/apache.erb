@@ -2,11 +2,11 @@
 
 <VirtualHost *:<%= @port %>>
   ServerAdmin admin@<%= @domain %>
-<% if @preprocessor -%>
-	ServerName <%= @domain %>
-<% else -%>
+<% if @runfrontend -%>
 	ServerName <%= @maindomain %>
 	ServerAlias <%= @domain %>
+<% else -%>
+	ServerName <%= @domain %>
 <% end -%>
 
 <% if @port == 443 -%>

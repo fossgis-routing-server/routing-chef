@@ -21,6 +21,7 @@ default_attributes(
     :osmdataurl => "http://planet.osm.org/pbf/planet-latest.osm.pbf",
     :osrm => {
         :preprocess => true,
+        :runfrontend => false
     }
 )
 
