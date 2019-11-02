@@ -26,7 +26,7 @@ default_attributes(
 
 run_list(
     "recipe[accounts]",
-    "role[osrm]",
+    "role[osrm_12]",
     "role[letsencrypt]",
     "role[export]",
 )

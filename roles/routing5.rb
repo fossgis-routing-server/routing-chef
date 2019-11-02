@@ -1,7 +1,7 @@
-name "routing1"
-description "Master role applied to routing2"
+name "routing5"
+description "Master role applied to routing5"
 
-myhostname = "routing2"
+myhostname = "routing5"
 
 default_attributes(
     :myhostname => myhostname,
@@ -15,17 +15,17 @@ default_attributes(
     },
     :apache => {
         :ssl => {
-            :certificate => "letsencrypt/live/routing2.openstreetmap.de"
+            :certificate => "letsencrypt/live/routing5.openstreetmap.de"
         }
     },
+    :osmdataurl => "http://planet.osm.org/pbf/planet-latest.osm.pbf",
     :osrm => {
-        :preprocess => false,
-        :frontenddomain => "routing.openstreetmap.de"
+        :preprocess => true,
     }
 )
 
 run_list(
     "recipe[accounts]",
-    "role[osrm_12]",
     "role[letsencrypt]",
+    "role[osrm]",
 )

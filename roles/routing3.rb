@@ -1,7 +1,7 @@
-name "routing1"
-description "Master role applied to routing2"
+name "routing3"
+description "Master role applied to routing3"
 
-myhostname = "routing2"
+myhostname = "routing3"
 
 default_attributes(
     :myhostname => myhostname,
@@ -9,13 +9,9 @@ default_attributes(
     :accounts => {
         :admins => [ "spreng" ]
     },
-    :apt => {
-        :release => "xenial",
-        :sources => [ ]
-    },
     :apache => {
         :ssl => {
-            :certificate => "letsencrypt/live/routing2.openstreetmap.de"
+            :certificate => "letsencrypt/live/routing3.openstreetmap.de"
         }
     },
     :osrm => {
@@ -26,6 +22,6 @@ default_attributes(
 
 run_list(
     "recipe[accounts]",
-    "role[osrm_12]",
     "role[letsencrypt]",
+    "role[osrm]",
 )
