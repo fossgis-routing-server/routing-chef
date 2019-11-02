@@ -27,12 +27,17 @@ myhost = node[:myhostname]
 profiles = node[:profiles]
 profileareas = node[:profileareas]
 thishostprofiles = []
+hostmapping = {}
 
 for profile in profileareas.keys do
   if profileareas[profile][:host] == myhost
     thishostprofiles.push(profile)
   end
+  hostlist = hostmapping[profileareas[profile][:host]] || []
+  hostlist.push(profile)
+  hostmapping[profileareas[profile][:host]] = hostlist
 end
+
 
 frontenddomain = ""
 website_dir = "/var/www/routing"
@@ -216,8 +221,9 @@ for profilemain in profiles.keys
 end
 
 
-# planet
+# routing graph processing
 if node[:osrm][:preprocess]
+
   directory "#{basedir}/osmdata" do
       user  "osrm"
       group "osrm"
@@ -234,8 +240,9 @@ if node[:osrm][:preprocess]
     source "build-graphs.erb"
     mode 0755
     variables :basedir => basedir, :osmdata => osmdata,\
-	    :profiles => profileareas.keys.join(" "),\
-	    :thishostprofiles => thishostprofiles
+	    :profilelist => profileareas.keys.join(" "),\
+	    :thishostprofiles => thishostprofiles ,\
+            :hostmapping => hostmapping, :myhost => myhost
   end
 
   template "/etc/sudoers.d/osrm" do

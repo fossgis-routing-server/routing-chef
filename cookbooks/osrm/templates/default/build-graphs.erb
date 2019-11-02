@@ -9,9 +9,7 @@ LOGGING_CRIT="logger -i -t $SCRIPTNAME -p daemon.crit --"
 LOGGING_INFO="logger -i -t $SCRIPTNAME -p daemon.info --"
 LOGGING_NOTICE="logger -i -t $SCRIPTNAME -p daemon.notice --"
 
-DESTINATION_HOST=routing2.openstreetmap.de
-
-for PROFILE in <%= @profiles %>
+for PROFILE in <%= @profilelist %>
 do
 
     cd $(dirname <%= @osmdata %>)
@@ -36,34 +34,54 @@ do
         -g header.option.osmosis_replication_timestamp \
         > <%= @basedir %>/build/${PROFILE}.data_timestamp | $LOGGING_ERR
         rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+    <% if  @hostmapping[@myhost] -%>
+    # stop osrm server before copying if local host is serving the current profile
     case $PROFILE in
-    <% @thishostprofiles.each do |profile| -%>
+        <% @hostmapping[@myhost].each do |profile| -%>
         <%= profile %>)
             sudo systemctl stop osrm-routed-<%= profile %>.service 2>&1 || \
             echo "osrm-routed-<%= profile %>.service was not started" | $LOGGING_INFO
             ;;
-    <% end -%>
+        <% end -%>
     esac
+    <% end -%>
     cp -l <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
+    <% if  @hostmapping[@myhost] -%>
+    # start server again after copying if local host is serving the current profile
     case $PROFILE in
-    <% @thishostprofiles.each do |profile| -%>
+        <% @hostmapping[@myhost].each do |profile| -%>
         <%= profile %>)
             sudo systemctl start osrm-routed-<%= profile %>.service 2>&1 | $LOGGING_INFO
             ;;
-    <% end -%>
+        <% end -%>
     esac
+    <% end -%>
 
 
     # copy graph to serving machine
+    DESTINATION_HOST="undefined"
+    case $PROFILE in
+    <% for host in @hostmapping.keys do -%>
+        <%= @hostmapping[host].join("|") %>)
+            DESTINATION_HOST=<%= host %>.openstreetmap.de
+            ;;
+    <% end -%>
+    esac
     COUNT=1
-    while [ "$COUNT" -le 3 ]
-    do
-        ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILE}.copying_finished"
-        rsync -W --exclude *.pbf \
-            <%= @basedir %>/build/${PROFILE}.[cdo]* \
-            osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
-        COUNT=$((COUNT+1))
-    done
+    if [ "$DESTINATION_HOST" != "<%= @myhost %>.openstreetmap.de" ]
+    then
+        while [ "$COUNT" -le 3 ]
+        do
+            ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILE}.copying_finished"
+            rsync -W --exclude *.pbf \
+                <%= @basedir %>/build/${PROFILE}.[cdo]* \
+                osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
+            COUNT=$((COUNT+1))
+        done
+        # create a timestamp file on the destination machine
+        date -Is > <%= @basedir %>/build/${PROFILE}.copying_finished
+        rsync -W <%= @basedir %>/build/${PROFILE}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
+    fi
 
     if [ "$COUNT" -gt 1 ]
     then
@@ -76,10 +94,7 @@ do
         fi
     fi
 
-    # create a timestamp file on the destination machine
-    date -Is > <%= @basedir %>/build/${PROFILE}.copying_finished
-    rsync -W <%= @basedir %>/build/${PROFILE}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
-    $LOGGING_INFO "copying graph $DESTINATION_HOST finished"
+    $LOGGING_INFO "copying graph to $DESTINATION_HOST finished"
 
 done
 
