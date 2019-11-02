@@ -46,7 +46,7 @@ package "libprotoc-dev"
 package "protobuf-compiler"
 package "libprotobuf-dev"
 package "libosmpbf-dev"
-package "libpng12-dev"
+package "libpng-dev"
 package "libbz2-dev"
 package "libstxxl-dev"
 package "libstxxl-doc"
@@ -65,7 +65,7 @@ package "libluabind-dev"
 package "libtbb-dev"
 package "libexpat-dev"
 package "node-browserify-lite"
-package "nodejs-legacy"
+package "nodejs"
 package "npm"
 package "libboost-python-dev"
 package "python3-dev"
@@ -85,6 +85,10 @@ package "python-markdown"
 # request-by-coordinate dispatch script
 package "libapache2-mod-wsgi-py3"
 package "python3-cherrypy3"
+
+# osmium tool for planet update and transform
+package "pyosmium"
+package "osmium-tool"
 
 directory "#{basedir}" do
     user  "osrm"
@@ -117,7 +121,7 @@ end
 
 git "#{basedir}/osrm-backend" do
   repository "git://github.com/fossgis-routing-server/osrm-backend.git"
-  revision "74e7f7279b1e516910d6381091f02f45c19f7efd"
+  revision "2f0f085ea301289824d197f4fa7628e26eb00043"
   user "osrm"
   group "osrm"
   notifies :run, "execute[compile_osrm]", :immediately
@@ -224,43 +228,6 @@ if node[:osrm][:preprocess]
     user "osrm"
     not_if { File.exists?(osmdata) }
     command "wget http://planet.osm.org/pbf/planet-latest.osm.pbf -nc -O #{osmdata}"
-  end
-
-  execute "compile_pyosmium" do
-    action :nothing
-    cwd "#{basedir}/pyosmium"
-    command "python3 steup.py build"
-    user "osrm"
-  end
-
-  git "#{basedir}/pyosmium" do
-    repository "https://github.com/osmcode/pyosmium.git"
-    revision "v2.13.0"
-    user "osrm"
-    group "osrm"
-    notifies :run, "execute[compile_pyosmium]", :immediately
-  end
-
-  git "#{basedir}/libosmium" do
-    repository "https://github.com/osmcode/libosmium.git"
-    revision "v2.13.1"
-    user "osrm"
-    group "osrm"
-  end
-
-  execute "compile_osmium-tool" do
-    action :nothing
-    cwd "#{basedir}/osmium-tool"
-    command "rm -f build; mkdir build && cd build && cmake .. && make -j 8"
-    user "osrm"
-  end
-
-  git "#{basedir}/osmium-tool" do
-    repository "https://github.com/osmcode/osmium-tool.git"
-    revision "v1.7.1"
-    user "osrm"
-    group "osrm"
-    notifies :run, "execute[compile_osmium-tool]", :immediately
   end
 
   template "#{basedir}/scripts/build-graphs.sh" do
