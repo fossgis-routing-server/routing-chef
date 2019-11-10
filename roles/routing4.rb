@@ -7,7 +7,7 @@ default_attributes(
     :myhostname => myhostname,
     :rooturl => "openstreetmap.de",
     :accounts => {
-        :admins => [ "spreng" ]
+        :admins => [ "spreng", "robert" ]
     },
     :apache => {
         :ssl => {
