@@ -33,7 +33,9 @@ do
     osmium fileinfo  <%= @basedir %>/build/$PROFILE.pbf \
         -g header.option.osmosis_replication_timestamp \
         > <%= @basedir %>/build/${PROFILE}.data_timestamp | $LOGGING_ERR
-        rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+    # fix strange permission of fileIndex
+    chmod 644  <%= @basedir %>/build/${PROFILE}.osrm.fileIndex
+    rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
     <% if  @hostmapping[@myhost] -%>
     # stop osrm server before copying if local host is serving the current profile
     case $PROFILE in
