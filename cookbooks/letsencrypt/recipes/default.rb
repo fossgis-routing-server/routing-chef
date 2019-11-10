@@ -42,5 +42,5 @@ template "/etc/cron.d/certbot-renew" do
     user   "root"
     group  "root"
     mode   "0644"
-    variables :webrootpath => "#{node[:accounts][:system][:osrm][:home]}/osrm-frontend/"
+    variables :webrootpath => "/var/www/routing"
 end
