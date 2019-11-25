@@ -26,16 +26,16 @@ in the server log file. Please see
 for more information on privacy.
 
 ## General setup
-There are two servers, one is continuously preparing the routing graph
-and fetching the most recent OpenStreetMap data, while  the other is
+There are three servers, one is continuously preparing the routing graph
+and fetching the most recent OpenStreetMap data, while the two others are
 serving routes from the precalculated graphs.
 
-The two servers both have 6 cores and 256GB ram.
+The three servers have 6 cores and 256GB ram each.
 
 ## Used software
 
 Most software running on the servers is available as open source.
-Ubuntu 16.04 is used as operating system.
+Ubuntu 18.04 is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
