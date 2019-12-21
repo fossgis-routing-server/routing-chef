@@ -331,6 +331,38 @@ node['munin']['plugin']['list'].each do |name, thing|
     end
 end
 
+cookbook_file "/etc/munin/plugin-conf.d/routing" do
+  source "munin_plugin-conf_routing"
+end
+
+if node[:osrm][:runfrontend]
+  template "/etc/munin/plugins/routing_count" do
+    source "munin_count.erb"
+    mode 0755
+    variables :profiles => profiles.keys
+  end
+
+  template "/etc/munin/plugins/routing_latency" do
+    source "munin_latency.py.erb"
+    mode 0755
+    variables :profiles => profiles.keys
+  end
+end
+
+if thishostprofiles.length > 0
+  template "/etc/munin/plugins/routing_size" do
+    source "munin_size.erb"
+    mode 0755
+    variables :thishostprofiles => thishostprofiles
+  end
+elsif node[:osrm][:preprocess]
+  template "/etc/munin/plugins/routing_size" do
+    source "munin_size.erb"
+    mode 0755
+    variables :thishostprofiles => profileareas.keys
+  end
+end
+
 # Apache configuration
 
 apache_module "proxy"
@@ -344,7 +376,8 @@ apache_site "routing.openstreetmap.de" do
             :munindir => "/var/cache/munin/www", :port => 80,\
             :runfrontend => node[:osrm][:runfrontend],\
             :maindomain => frontenddomain,\
-	    :rbcdir => "#{basedir}/request-by-coordinate"
+	    :rbcdir => "#{basedir}/request-by-coordinate",\
+            :profiles => profiles.keys
 end
 
 apache_site "routing.openstreetmap.de-ssl" do
@@ -354,7 +387,8 @@ apache_site "routing.openstreetmap.de-ssl" do
             :munindir => "/var/cache/munin/www", :port => 443,\
             :runfrontend => node[:osrm][:runfrontend],\
             :maindomain => frontenddomain,\
-	    :rbcdir => "#{basedir}/request-by-coordinate"
+	    :rbcdir => "#{basedir}/request-by-coordinate",\
+            :profiles => profiles.keys
 end
 
 # script for dispatching routing requests by region

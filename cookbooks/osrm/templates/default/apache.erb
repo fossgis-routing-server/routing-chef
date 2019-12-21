@@ -23,6 +23,9 @@
   LogLevel warn
 
   CustomLog ${APACHE_LOG_DIR}/routing.access.log combined
+  <% for tm in @profiles do -%>
+  CustomLog ${APACHE_LOG_DIR}/routing-times-<%= tm %>.log "%t %D" "expr=%{REQUEST_URI} =~ /routed-<%= tm %>/"
+  <% end -%>
 
   RewriteEngine On
 

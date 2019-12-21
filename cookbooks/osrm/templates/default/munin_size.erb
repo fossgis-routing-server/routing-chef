@@ -1,0 +1,23 @@
+#!/bin/bash
+
+transportmodes="<%= @thishostprofiles.join(" ") %>"
+
+case $1 in
+   config)
+        echo graph_title Routing graph sizes
+        echo graph_vlabel size
+        echo graph_category OSRM
+	echo graph_args --base 1024
+        for tm in $transportmodes
+        do
+            echo $tm.label $tm
+            echo $tm.min 0
+        done
+        exit 0;;
+esac
+
+for tm in $transportmodes
+do
+    printf "$tm.value "
+    du -bc /srv/osrm/data/$tm.* | tail -1 | cut -f1
+done
