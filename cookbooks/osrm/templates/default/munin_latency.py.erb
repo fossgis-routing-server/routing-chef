@@ -8,11 +8,47 @@ logdir="/var/log/apache2/"
 
 starttime = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(0,300)
 
+# each log line looks like this:
+# [01/Jan/2000:00:00:00 +0100] 9063
+#             date             us time for delivering the result
+date_end_char = 27 # fixed format. Position of the bracket ]
+min_samples = 128 # take at least that many samples for a meaningful statistic
+                  # going back more than the last 5 minutes in quiet times
+
+# read from end, until a time stamp after t is found
+def linesFromEnd(f, t, min_lines = 0):
+    bs = 2**12 # block size 4k. block size must be much larger than log line size!
+               # if block size is smaller than a log line, it will fail to read
+               # the date
+    n_lines = 0
+
+    f.seek(0, 2) # seek end
+    f_size = f.tell()
+    n_blocks = f_size // bs # how many blocks the file has
+    blocks = [] # blocks read, in reverse order
+
+    # the first read is from bs * n_blocks until end
+    f.seek(n_blocks * bs, 0)
+    blocks.append(f.read(f_size - n_blocks * bs))
+    n_lines += blocks[-1].count(b'\n')
+    for i in range(n_blocks - 1, -1, -1):
+        # read another block
+        f.seek(i * bs, 0)
+        blocks.append(f.read(bs))
+        n_lines += blocks[-1].count(b'\n')
+        line_start = blocks[-1].find(b'\n') + 1
+        if n_lines > min_lines and line_start > 0 and line_start + 1 + date_end_char < bs:
+            date_string = blocks[-1][line_start + 1:line_start + date_end_char].decode("utf-8")
+            date = datetime.datetime.strptime(date_string, "%d/%b/%Y:%H:%M:%S %z")
+            if date < t:
+                break
+    return b''.join(reversed(blocks)).splitlines()
+
 # for munin: advertise which values will be given and how to label them
 if len(sys.argv) > 1 and sys.argv[1] == "config":
     print("graph_title Routing latency")
     print("graph_vlabel request time")
-    print("graph_args --base 1000 -l 0")
+    print("graph_args --base 1000 -l 0 -u 1 -r --allow-shrink")
     print("graph_category OSRM")
     print("graph_info average time taken to deliver a route in the last 5 minutes")
     for tm in transportmodes:
@@ -25,18 +61,14 @@ else:
     for tm in transportmodes:
         logpath = os.path.join(logdir, "routing-times-{0}.log".format(tm))
         logfile = open(logpath, "rb")
-        # each log line looks like this:
-        # [01/Jan/2000:00:00:00 +0100] 9063
-        #             date             us time for delivering the result
-        date_end_char = 27 # fixed format. Position of the bracket ]
-        logfile = list(logfile)
-        logfile.reverse()
+        logfile = reversed(linesFromEnd(logfile, starttime, min_lines = min_samples))
         timelist = list()
         for logline in logfile:
-            date = datetime.datetime.strptime(logline[1:date_end_char].decode("utf-8"), "%d/%b/%Y:%H:%M:%S %z")
+            if len(timelist) > min_samples:
+                date = datetime.datetime.strptime(logline[1:date_end_char].decode("utf-8"), "%d/%b/%Y:%H:%M:%S %z")
+                if date < starttime:
+                    break
             time = logline[date_end_char+2:]
-            if date < starttime:
-                break
             timelist.append(float(time))
 
         if len(timelist) > 0:
