@@ -23,6 +23,7 @@ default_attributes(
 
 run_list(
     "recipe[accounts]",
+    "recipe[system]",
     "role[letsencrypt]",
     "role[osrm]",
 )
