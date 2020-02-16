@@ -39,7 +39,7 @@ Ubuntu 18.04 is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
-Currently running v5.14.1
+Currently running v5.18.0
 
 * hints are disabled, because they can crash the server
 
