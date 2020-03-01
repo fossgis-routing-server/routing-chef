@@ -16,6 +16,13 @@ do
     $LOGGING_INFO starting pyosmium-up-to-date -v <%= @osmdata %>
     pyosmium-up-to-date \
       -s 10000 -v <%= @osmdata %> | $LOGGING_INFO
+
+    if [ ${PIPESTATUS[0]} -gt 0 ]
+    then
+        $LOGGING_ERR "updating planet failed!"
+        continue
+    fi
+
     $LOGGING_INFO finished updating planet
 
     if [ -f <%= @basedir %>/extract/$PROFILE.geojson ]
@@ -23,19 +30,53 @@ do
         osmium extract \
             -p <%= @basedir %>/extract/$PROFILE.geojson osmdata.pbf -O \
             -o $PROFILE.pbf | $LOGGING_INFO
+        if [ ${PIPESTATUS[0]} -gt 0 ]
+        then
+            $LOGGING_ERR "osmium extract failed!"
+            continue
+        fi
+
     else
         ln -f osmdata.pbf $PROFILE.pbf | $LOGGING_ERR
     fi
 
     cd <%= @basedir %>/cbf-routing-profiles/
-    $LOGGING_INFO starting compile_profiles
+
+    $LOGGING_INFO "starting compile_profiles"
+
     ./compile_profiles.sh profile-${PROFILE}.conf 2>&1 | $LOGGING_INFO
-    osmium fileinfo  <%= @basedir %>/build/$PROFILE.pbf \
-        -g header.option.osmosis_replication_timestamp \
-        > <%= @basedir %>/build/${PROFILE}.data_timestamp | $LOGGING_ERR
+
+    $LOGGING_INFO "compile_profiles finished"
+
+    # check if graph was calculated successfully. The mldgr file is the last
+    # one, and should be at least 6GiB
+
+    $LOGGING_INFO "check size of <%= @basedir %>/build/${PROFILE}.osrm.mldgr: $(du <%= @basedir %>/build/${PROFILE}.osrm.mldgr | cut -f 1)"
+
+    if [ ! -f <%= @basedir %>/build/${PROFILE}.osrm.mldgr ]
+    then
+        $LOGGING_ERR "graph calculation failed!"
+        continue
+    fi
+    if [ $(du <%= @basedir %>/build/${PROFILE}.osrm.mldgr | cut -f 1) -lt 6291456 ]
+    then
+        $LOGGING_ERR "graph calculation failed!"
+        continue
+    fi
+
+    $LOGGING_INFO "check successful. extract fileinfo"
+
+    osmium fileinfo <%= @osmdata %> -g header.option.osmosis_replication_timestamp \
+        > <%= @basedir %>/build/${PROFILE}.data_timestamp
+
+    $LOGGING_INFO "fileinfo: $(cat <%= @basedir %>/build/${PROFILE}.data_timestamp)"
+
     # fix strange permission of fileIndex
+    $LOGGING_INFO "fix strange permission of fileIndex"
     chmod 644  <%= @basedir %>/build/${PROFILE}.osrm.fileIndex
     rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
+
+    $LOGGING_INFO "start copying"
     <% if  @hostmapping[@myhost] -%>
     # stop osrm server before copying if local host is serving the current profile
     case $PROFILE in
