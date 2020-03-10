@@ -1,0 +1,26 @@
+#!/usr/sbin/nft -f
+#
+# MAINTAINED BY CHEF
+# DO NOT EDIT
+
+
+flush ruleset
+
+table inet filter {
+        chain input {
+                type filter hook input priority 0;
+                tcp dport http ct state new jump rate-limit
+        }
+        chain forward {
+                type filter hook forward priority 0;
+        }
+        chain output {
+                type filter hook output priority 0;
+        }
+        chain rate-limit {
+                meter httplimit4 { ip saddr limit rate 2/second burst 20 packets}  counter accept
+                meter httplimit6 { ip6 saddr limit rate 2/second burst 20 packets}  counter accept
+                drop
+        }
+}
+

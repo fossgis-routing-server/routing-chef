@@ -1,0 +1,8 @@
+= DESCRIPTION: Firewall configuration
+
+= REQUIREMENTS: nftables
+
+= ATTRIBUTES:
+
+= USAGE: configuration in nftables.erb
+
