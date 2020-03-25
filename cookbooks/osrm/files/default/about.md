@@ -25,6 +25,17 @@ in the server log file. Please see
 [Datenschutzerklärung](https://www.fossgis.de/datenschutzerklaerung)
 for more information on privacy.
 
+## Usage policy
+The full usage policy can be found
+[on the fossgis website](https://www.fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/)
+in German. Here a short excerpt:
+
+* Display the required attribution and display a link to
+["fix the map"](https://www.openstreetmap.org/fixthemap).
+* Use a valid user agent and, if applicable, a correct referrer.
+* One request per second max.
+* No scraping, no heavy usage.
+
 ## General setup
 There are three servers, one is continuously preparing the routing graph
 and fetching the most recent OpenStreetMap data, while the two others are
@@ -35,11 +46,11 @@ The three servers have 6 cores and 256GB ram each.
 ## Used software
 
 Most software running on the servers is available as open source.
-Ubuntu 18.04 is used as operating system.
+Debian is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
-Currently running v5.14.1
+Currently running v5.18.0
 
 * hints are disabled, because they can crash the server
 
