@@ -369,26 +369,56 @@ apache_module "proxy"
 apache_module "proxy_http"
 apache_module "rewrite"
 
-apache_site "routing.openstreetmap.de" do
+apache_site "#{node[:myhostname]}.#{node[:rooturl]}" do
     template "apache.erb"
     directory website_dir
-    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
-            :munindir => "/var/cache/munin/www", :port => 80,\
-            :runfrontend => node[:osrm][:runfrontend],\
-            :maindomain => frontenddomain,\
-	    :rbcdir => "#{basedir}/request-by-coordinate",\
-            :profiles => profiles.keys
+    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}", :port => 80,\
+            :munin => true, :munindir => "/var/cache/munin/www", \
+	    :rbs => false
 end
 
-apache_site "routing.openstreetmap.de-ssl" do
+apache_site "#{node[:myhostname]}.#{node[:rooturl]}-ssl" do
     template "apache.erb"
     directory website_dir
-    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}",\
-            :munindir => "/var/cache/munin/www", :port => 443,\
-            :runfrontend => node[:osrm][:runfrontend],\
-            :maindomain => frontenddomain,\
-	    :rbcdir => "#{basedir}/request-by-coordinate",\
-            :profiles => profiles.keys
+    variables :domain => "#{node[:myhostname]}.#{node[:rooturl]}", :port => 443,\
+            :munin => true, :munindir => "/var/cache/munin/www", \
+	    :rbs => false
+end
+
+if node[:osrm][:runfrontend]
+  apache_site "#{frontenddomain}" do
+      template "apache.erb"
+      directory website_dir
+      variables :domain => frontenddomain, :port => 80,\
+              :munin => false ,\
+              :rbs => true, :rbcdir => "#{basedir}/request-by-coordinate",\
+              :profiles => profiles.keys
+  end
+
+  apache_site "#{frontenddomain}-ssl" do
+      template "apache.erb"
+      directory website_dir
+      variables :domain => frontenddomain, :port => 443,\
+              :munin => false, \
+              :rbs => true, :rbcdir => "#{basedir}/request-by-coordinate",\
+              :profiles => profiles.keys
+  end
+
+  apache_site "map.project-osrm.org" do
+      template "apache.erb"
+      directory website_dir
+      variables :domain => "map.project-osrm.org", :port => 80,\
+              :munin => false, \
+              :rbs => false
+  end
+
+  apache_site "map.project-osrm.org-ssl" do
+      template "apache.erb"
+      directory website_dir
+      variables :domain => "map.project-osrm.org", :port => 443,\
+              :munin => false, \
+              :rbs => false
+  end
 end
 
 # script for dispatching routing requests by region
