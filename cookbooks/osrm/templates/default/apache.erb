@@ -105,7 +105,7 @@
     WSGIScriptAlias /routed-foot  <%= @rbcdir %>/request-by-coordinate.py/foot
     WSGIApplicationGroup %{SERVER}
   <% if @port == 80 -%>
-    WSGIDaemonProcess request-by-coordinate home=<%= @rbcdir %> user=osrm group=osrm processes=1 threads=10
+    WSGIDaemonProcess request-by-coordinate home=<%= @rbcdir %> user=osrm group=osrm processes=5 threads=10
   <% end -%>
     WSGIProcessGroup request-by-coordinate
 
