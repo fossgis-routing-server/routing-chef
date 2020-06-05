@@ -161,7 +161,7 @@ if node[:osrm][:runfrontend]
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "d58f04d2428d5cded3d51223164374ee9cbcdab2"
+    revision "dc07ddb6088a1fcb26fdbf01b5cad3611d91f5df"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
