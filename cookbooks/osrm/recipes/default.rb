@@ -424,7 +424,7 @@ end
 # script for dispatching routing requests by region
 git "#{basedir}/request-by-coordinate" do
   repository "git://github.com/fossgis-routing-server/request-by-coordinate.git"
-  revision "d33b8d59a283f1c1046cb96c81258fc361cf5e64"
+  revision "8bf7783311c8f1efc7b0185aa57b41cfd90ecd37"
   user "osrm"
   group "osrm"
 end
