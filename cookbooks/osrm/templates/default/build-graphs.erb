@@ -124,6 +124,9 @@ do
         # create a timestamp file on the destination machine
         date -Is > <%= @basedir %>/build/${PROFILE}.copying_finished
         rsync -W <%= @basedir %>/build/${PROFILE}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
+        # data time stamp
+        echo rsync -W <%= @basedir %>/build/${PROFILE}.data_timestamp osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps 2>&1 | $LOGGING_INFO
+        rsync -W <%= @basedir %>/build/${PROFILE}.data_timestamp osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps 2>&1 | $LOGGING_ERR
     fi
 
     if [ "$COUNT" -gt 1 ]

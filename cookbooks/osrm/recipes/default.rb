@@ -146,6 +146,14 @@ directory website_dir do
 end
 
 if node[:osrm][:runfrontend]
+  directory "#{website_dir}/timestamps" do
+      user  "osrmdata"
+      group "osrmdata"
+  end
+end
+
+
+if node[:osrm][:runfrontend]
 
   frontenddomain=node[:osrm][:frontenddomain]
 
@@ -242,7 +250,8 @@ if node[:osrm][:preprocess]
     variables :basedir => basedir, :osmdata => osmdata,\
 	    :profilelist => profileareas.keys.join(" "),\
 	    :thishostprofiles => thishostprofiles ,\
-            :hostmapping => hostmapping, :myhost => myhost
+            :hostmapping => hostmapping, :myhost => myhost ,\
+            :webdir => website_dir, :fronthost => "routing3.openstreetmap.de"
   end
 
   template "/etc/sudoers.d/osrm" do
