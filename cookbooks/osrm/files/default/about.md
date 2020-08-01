@@ -35,7 +35,7 @@ The three servers have 6 cores and 256GB ram each.
 ## Used software
 
 Most software running on the servers is available as open source.
-Ubuntu 18.04 is used as operating system.
+Debian 10 is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
