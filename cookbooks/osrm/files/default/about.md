@@ -58,6 +58,10 @@ especially the bike and foot profiles.
 * bike: worldwide
 * foot: worldwide
 
+### [Overview of routing data updates](http://map.project-osrm.org/timestamps/)
+
+The routing data are updated daily. There may be delays in the internal processing and creation of the routing diagram.
+
 ### [Server configuration](https://github.com/fossgis-routing-server/routing-chef/)
 
 The server configuration is available as [chef](https://www.chef.sh/) scripts in a github repository, too. 
