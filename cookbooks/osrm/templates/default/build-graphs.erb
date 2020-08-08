@@ -29,6 +29,7 @@ do
     then
         osmium extract \
             -p <%= @basedir %>/extract/$PROFILE.geojson osmdata.pbf -O \
+            --output-header=osmosis_replication_timestamp! --output-header=timestamp! \
             -o $PROFILE.pbf | $LOGGING_INFO
         if [ ${PIPESTATUS[0]} -gt 0 ]
         then
@@ -39,6 +40,9 @@ do
     else
         ln -f osmdata.pbf $PROFILE.pbf | $LOGGING_ERR
     fi
+
+    osmium fileinfo <%= @osmdata %> -g header.option.osmosis_replication_timestamp \
+        > <%= @basedir %>/build/${PROFILE}.data_timestamp
 
     cd <%= @basedir %>/cbf-routing-profiles/
 
