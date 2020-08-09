@@ -13,7 +13,7 @@ for PROFILE in <%= @profilelist %>
 do
 
     cd $(dirname <%= @osmdata %>)
-    $LOGGING_INFO starting pyosmium-up-to-date -v <%= @osmdata %>
+    $LOGGING_INFO starting ${PROFILE}: running pyosmium-up-to-date -v <%= @osmdata %>
     pyosmium-up-to-date \
       -s 10000 -v <%= @osmdata %> | $LOGGING_INFO
 
