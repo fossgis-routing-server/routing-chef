@@ -212,7 +212,7 @@ end
 
 git "#{basedir}/cbf-routing-profiles" do
   repository "git://github.com/fossgis-routing-server/cbf-routing-profiles.git"
-  revision "5c0ed5c5c4540dd50752053674fffa094f0c23a4"
+  revision "9358cab13e55e61bea14da3534c0398a18f194d8"
   user "osrm"
   group "osrm"
 end
