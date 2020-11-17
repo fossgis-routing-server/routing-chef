@@ -22,7 +22,7 @@ You can contact the system administrators at
 Your request for a route is sent to our server (because the route is
 calculated on the server and only displayed in your browser) and is saved
 in the server log file. Please see
-[Datenschutzerklärung](https://www.fossgis.de/datenschutzerklaerung)
+[Datenschutzerklärung](https://www.fossgis.de/datenschutzerklärung)
 for more information on privacy.
 
 ## Usage policy
@@ -46,7 +46,7 @@ The three servers have 6 cores and 256GB ram each.
 ## Used software
 
 Most software running on the servers is available as open source.
-Debian is used as operating system.
+Debian 10 is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
@@ -68,6 +68,10 @@ especially the bike and foot profiles.
 * car: worldwide
 * bike: worldwide
 * foot: worldwide
+
+### [Overview of routing data updates](http://map.project-osrm.org/timestamps/)
+
+The routing data are updated daily. There may be delays in the internal processing and creation of the routing diagram.
 
 ### [Server configuration](https://github.com/fossgis-routing-server/routing-chef/)
 
