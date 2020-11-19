@@ -160,7 +160,7 @@ default_attributes(
         "footafoce" => {
                 :host => "routing4",
                 :poly => polyafoce,
-                :port => 3335
+                :port => 3336
         },
         "footam" => {
                 :host => "routing4",
