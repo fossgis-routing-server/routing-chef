@@ -126,7 +126,7 @@ end
 
 git "#{basedir}/osrm-backend" do
   repository "git://github.com/fossgis-routing-server/osrm-backend.git"
-  revision "2f0f085ea301289824d197f4fa7628e26eb00043"
+  revision "a823897b1e16a0d8592f41a68062f4c4e279231c"
   user "osrm"
   group "osrm"
   notifies :run, "execute[compile_osrm]", :immediately

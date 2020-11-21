@@ -50,7 +50,7 @@ Debian 10 is used as operating system.
 
 ### [OSRM backend](https://github.com/fossgis-routing-server/osrm-backend)
 
-Currently running v5.18.0
+Currently running v5.23.0
 
 * hints are disabled, because they can crash the server
 
