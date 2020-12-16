@@ -22,7 +22,7 @@ default_attributes(
 )
 
 run_list(
-    "recipe[accounts]",
+    "role[accounts]",
     "recipe[system]",
     "role[letsencrypt]",
     "role[osrm]",
