@@ -6,9 +6,6 @@ myhostname = "routing4"
 default_attributes(
     :myhostname => myhostname,
     :rooturl => "openstreetmap.de",
-    :accounts => {
-        :admins => [ "spreng", "robert" ]
-    },
     :apache => {
         :ssl => {
             :certificate => "letsencrypt/live/routing4.openstreetmap.de"
