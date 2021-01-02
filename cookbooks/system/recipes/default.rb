@@ -18,9 +18,16 @@
 #
 
 package "augeas-tools"
-
+package "unattended-upgrades"
+package "apt-listchanges"
 
 execute "prohibit_ssh_password_login" do
   user    "root"
   command "augtool set /files/etc/ssh/sshd_config/PasswordAuthentication no"
+end
+
+execute "enable_unattended_upgrades" do
+  user "root"
+  command "echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
+           dpkg-reconfigure -f noninteractive unattended-upgrades"
 end

@@ -244,13 +244,30 @@ if node[:osrm][:preprocess]
     command "wget http://planet.osm.org/pbf/planet-latest.osm.pbf -nc -O #{osmdata}"
   end
 
+  profiles.each do |profile, pareanames|
+    areas = {}
+    pareanames.each do |profilearea|
+      if profileareas[profilearea][:poly]
+        areas[profilearea] = profileareas[profilearea][:poly]
+      end
+    end
+
+    if areas.length > 0
+      template "#{basedir}/extract/#{profile}.osmiconf" do
+        source "osmiconf.erb"
+        mode 0644
+        variables :osmdatadir => "#{basedir}/osmdata",
+                  :areas => areas
+      end
+    end
+  end
+
   template "#{basedir}/scripts/build-graphs.sh" do
     source "build-graphs.erb"
     mode 0755
-    variables :basedir => basedir, :osmdata => osmdata,\
-	    :profilelist => profileareas.keys.join(" "),\
-	    :thishostprofiles => thishostprofiles ,\
-            :hostmapping => hostmapping, :myhost => myhost ,\
+    variables :basedir => basedir, :osmdata => osmdata,
+            :profiles => profiles,
+            :hostmapping => hostmapping, :myhost => myhost ,
             :webdir => website_dir, :fronthost => "routing3.openstreetmap.de"
   end
 

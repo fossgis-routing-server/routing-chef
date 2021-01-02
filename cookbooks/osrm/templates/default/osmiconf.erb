@@ -1,0 +1,11 @@
+{
+    "extracts": [<% @areas.each do |area, poly| %>
+        {
+            "output": "<%= area %>.pbf",
+            "output_format": "pbf",
+            "polygon": [ <%= poly %> ]
+        },<% end -%>
+    ],
+    "directory": "<%= @osmdatadir %>"
+}
+        

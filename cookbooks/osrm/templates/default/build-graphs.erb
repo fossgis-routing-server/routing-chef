@@ -9,8 +9,17 @@ LOGGING_CRIT="logger -i -t $SCRIPTNAME -p daemon.crit --"
 LOGGING_INFO="logger -i -t $SCRIPTNAME -p daemon.info --"
 LOGGING_NOTICE="logger -i -t $SCRIPTNAME -p daemon.notice --"
 
-for PROFILE in <%= @profilelist %>
+declare -A PROFILE_REGIONS
+
+for PROFILE in <%= @profiles.keys.join(" ") %>
 do
+    case $PROFILE in
+    <% for profilemain in @profiles.keys -%>
+        <%= profilemain %>)
+            REGIONS="<%= @profiles[profilemain].join(" ") %>"
+            ;;
+    <% end -%>
+    esac
 
     cd $(dirname <%= @osmdata %>)
     $LOGGING_INFO starting ${PROFILE}: running pyosmium-up-to-date -v <%= @osmdata %>
@@ -25,12 +34,12 @@ do
 
     $LOGGING_INFO finished updating planet
 
-    if [ -f <%= @basedir %>/extract/$PROFILE.geojson ]
+    if [ -f <%= @basedir %>/extract/$PROFILE.osmiconf ]
     then
         osmium extract \
-            -p <%= @basedir %>/extract/$PROFILE.geojson osmdata.pbf -O \
-            --output-header=osmosis_replication_timestamp! --output-header=timestamp! \
-            -o $PROFILE.pbf | $LOGGING_INFO
+            --config <%= @basedir %>/extract/$PROFILE.osmiconf osmdata.pbf -O \
+            --output-header=osmosis_replication_timestamp! \
+            --output-header=timestamp! | $LOGGING_INFO
         if [ ${PIPESTATUS[0]} -gt 0 ]
         then
             $LOGGING_ERR "osmium extract failed!"
@@ -42,110 +51,110 @@ do
     fi
 
     osmium fileinfo <%= @osmdata %> -g header.option.osmosis_replication_timestamp \
-        > <%= @basedir %>/build/${PROFILE}.data_timestamp
+        > <%= @osmdata %>.data_timestamp
 
-    cd <%= @basedir %>/cbf-routing-profiles/
+    for PROFILEAREA in $REGIONS
+    do
+        cd <%= @basedir %>/cbf-routing-profiles/
 
-    $LOGGING_INFO "starting compile_profiles"
+        $LOGGING_INFO "starting compile_profiles"
 
-    ./compile_profiles.sh profile-${PROFILE}.conf 2>&1 | $LOGGING_INFO
+        ./compile_profiles.sh profile-${PROFILEAREA}.conf 2>&1 | $LOGGING_INFO
 
-    $LOGGING_INFO "compile_profiles finished"
+        $LOGGING_INFO "compile_profiles finished"
 
-    # check if graph was calculated successfully. The mldgr file is the last
-    # one, and should be at least 6GiB
+        # check if graph was calculated successfully. The mldgr file is the last
+        # one, and should be at least 6GiB
 
-    $LOGGING_INFO "check size of <%= @basedir %>/build/${PROFILE}.osrm.mldgr: $(du <%= @basedir %>/build/${PROFILE}.osrm.mldgr | cut -f 1)"
+        $LOGGING_INFO "check size of <%= @basedir %>/build/${PROFILEAREA}.osrm.mldgr: "\
+                      "$(du <%= @basedir %>/build/${PROFILEAREA}.osrm.mldgr | cut -f 1)"
 
-    if [ ! -f <%= @basedir %>/build/${PROFILE}.osrm.mldgr ]
-    then
-        $LOGGING_ERR "graph calculation failed!"
-        continue
-    fi
-    if [ $(du <%= @basedir %>/build/${PROFILE}.osrm.mldgr | cut -f 1) -lt 6291456 ]
-    then
-        $LOGGING_ERR "graph calculation failed!"
-        continue
-    fi
-
-    $LOGGING_INFO "check successful. extract fileinfo"
-
-    osmium fileinfo <%= @osmdata %> -g header.option.osmosis_replication_timestamp \
-        > <%= @basedir %>/build/${PROFILE}.data_timestamp
-
-    $LOGGING_INFO "fileinfo: $(cat <%= @basedir %>/build/${PROFILE}.data_timestamp)"
-
-    # fix strange permission of fileIndex
-    $LOGGING_INFO "fix strange permission of fileIndex"
-    chmod 644  <%= @basedir %>/build/${PROFILE}.osrm.fileIndex
-    rm -f <%= @basedir %>/data/${PROFILE}*  2>&1 | $LOGGING_ERR
-
-    $LOGGING_INFO "start copying"
-    <% if  @hostmapping[@myhost] -%>
-    # stop osrm server before copying if local host is serving the current profile
-    case $PROFILE in
-        <% @hostmapping[@myhost].each do |profile| -%>
-        <%= profile %>)
-            sudo systemctl stop osrm-routed-<%= profile %>.service 2>&1 || \
-            echo "osrm-routed-<%= profile %>.service was not started" | $LOGGING_INFO
-            ;;
-        <% end -%>
-    esac
-    <% end -%>
-    cp -l <%= @basedir %>/build/${PROFILE}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
-    <% if  @hostmapping[@myhost] -%>
-    # start server again after copying if local host is serving the current profile
-    case $PROFILE in
-        <% @hostmapping[@myhost].each do |profile| -%>
-        <%= profile %>)
-            sudo systemctl start osrm-routed-<%= profile %>.service 2>&1 | $LOGGING_INFO
-            ;;
-        <% end -%>
-    esac
-    <% end -%>
-
-
-    # copy graph to serving machine
-    DESTINATION_HOST="undefined"
-    case $PROFILE in
-    <% for host in @hostmapping.keys do -%>
-        <%= @hostmapping[host].join("|") %>)
-            DESTINATION_HOST=<%= host %>.openstreetmap.de
-            ;;
-    <% end -%>
-    esac
-    COUNT=1
-    if [ "$DESTINATION_HOST" != "<%= @myhost %>.openstreetmap.de" ]
-    then
-        while [ "$COUNT" -le 3 ]
-        do
-            ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILE}.copying_finished"
-            rsync -W --exclude *.pbf \
-                <%= @basedir %>/build/${PROFILE}.[cdo]* \
-                osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
-            COUNT=$((COUNT+1))
-        done
-        # create a timestamp file on the destination machine
-        date -Is > <%= @basedir %>/build/${PROFILE}.copying_finished
-        rsync -W <%= @basedir %>/build/${PROFILE}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
-        # data time stamp
-        echo rsync -W <%= @basedir %>/build/${PROFILE}.data_timestamp osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps 2>&1 | $LOGGING_INFO
-        rsync -W <%= @basedir %>/build/${PROFILE}.data_timestamp osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps 2>&1 | $LOGGING_ERR
-    fi
-
-    if [ "$COUNT" -gt 1 ]
-    then
-        if [ "$COUNT" -gt 3 ]
+        if [ ! -f <%= @basedir %>/build/${PROFILEAREA}.osrm.mldgr ]
         then
-            $LOGGING_CMD "Failed to copy the graph of profile $PROFILE to $DESTINATION_HOST:<%= @basedir %>/build/"
-            exit 1
-        else
-            $LOGGING_NOTICE "Needed $COUNT attempts to copy the graph of profile $PROFILE to $DESTINATION_HOST:<%= @basedir %>/build/"
+            $LOGGING_ERR "graph calculation failed!"
+            continue
         fi
-    fi
+        if [ $(du <%= @basedir %>/build/${PROFILEAREA}.osrm.mldgr | cut -f 1) -lt 6291456 ]
+        then
+            $LOGGING_ERR "graph calculation failed!"
+            continue
+        fi
 
-    $LOGGING_INFO "copying graph to $DESTINATION_HOST finished"
+        $LOGGING_INFO "check successful."
 
+        # fix strange permission of fileIndex
+        $LOGGING_INFO "fix strange permission of fileIndex"
+        chmod 644  <%= @basedir %>/build/${PROFILEAREA}.osrm.fileIndex
+        rm -f <%= @basedir %>/data/${PROFILEAREA}*  2>&1 | $LOGGING_ERR
+
+        $LOGGING_INFO "start copying"
+        <% if  @hostmapping[@myhost] -%>
+        # stop osrm server before copying if local host is serving the current profile
+        case $PROFILEAREA in
+            <% @hostmapping[@myhost].each do |profile| -%>
+            <%= profile %>)
+                sudo systemctl stop osrm-routed-<%= profile %>.service 2>&1 || \
+                echo "osrm-routed-<%= profile %>.service was not started" | $LOGGING_INFO
+                ;;
+            <% end -%>
+        esac
+        <% end -%>
+        cp -l <%= @basedir %>/build/${PROFILEAREA}* <%= @basedir %>/data/ 2>&1 | $LOGGING_ERR
+        <% if  @hostmapping[@myhost] -%>
+        # start server again after copying if local host is serving the current profile
+        case $PROFILEAREA in
+            <% @hostmapping[@myhost].each do |profile| -%>
+            <%= profile %>)
+                sudo systemctl start osrm-routed-<%= profile %>.service 2>&1 | $LOGGING_INFO
+                ;;
+            <% end -%>
+        esac
+        <% end -%>
+
+
+        # copy graph to serving machine
+        DESTINATION_HOST="undefined"
+        case $PROFILEAREA in
+        <% for host in @hostmapping.keys do -%>
+            <%= @hostmapping[host].join("|") %>)
+                DESTINATION_HOST=<%= host %>.openstreetmap.de
+                ;;
+        <% end -%>
+        esac
+        COUNT=1
+        if [ "$DESTINATION_HOST" != "<%= @myhost %>.openstreetmap.de" ]
+        then
+            while [ "$COUNT" -le 3 ]
+            do
+                ssh osrmdata@$DESTINATION_HOST "rm -f <%= @basedir %>/build/${PROFILEAREA}.copying_finished"
+                rsync -W --exclude *.pbf \
+                    <%= @basedir %>/build/${PROFILEAREA}.[cdo]* \
+                    osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR && break
+                COUNT=$((COUNT+1))
+            done
+            # create a timestamp file on the destination machine
+            date -Is > <%= @basedir %>/build/${PROFILEAREA}.copying_finished
+            rsync -W <%= @basedir %>/build/${PROFILEAREA}.copying_finished osrmdata@$DESTINATION_HOST:<%= @basedir %>/build/ 2>&1 | $LOGGING_ERR
+            # data time stamp
+            echo rsync -W <%= @osmdata %>.data_timestamp \
+                    osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps/${PROFILEAREA}.data_timestamp | $LOGGING_INFO
+            rsync -W <%= @osmdata %>.data_timestamp \
+                    osrmdata@<%= @fronthost %>:<%= @webdir %>/timestamps/${PROFILEAREA}.data_timestamp 2>&1 | $LOGGING_ERR
+        fi
+
+        if [ "$COUNT" -gt 1 ]
+        then
+            if [ "$COUNT" -gt 3 ]
+            then
+                $LOGGING_CMD "Failed to copy the graph of profile $PROFILEAREA to $DESTINATION_HOST:<%= @basedir %>/build/"
+                exit 1
+            else
+                $LOGGING_NOTICE "Needed $COUNT attempts to copy the graph of profile $PROFILEAREA to $DESTINATION_HOST:<%= @basedir %>/build/"
+            fi
+        fi
+
+        $LOGGING_INFO "copying graph to $DESTINATION_HOST finished"
+    done
 done
 
 
