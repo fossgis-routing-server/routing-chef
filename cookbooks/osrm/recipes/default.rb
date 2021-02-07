@@ -120,13 +120,13 @@ execute "compile_osrm" do
   cwd "#{basedir}/osrm-backend"
   # use -DCMAKE_BUILD_TYPE=RelWithDebInfo for debugging 
   command "rm -rf build && mkdir -p build && cd build "\
-          "&& cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_STXXL=ON .. && make -j 6"
+          "&& cmake -DCMAKE_BUILD_TYPE=Release .. && make -j 6"
   user "osrm"
 end
 
 git "#{basedir}/osrm-backend" do
   repository "git://github.com/fossgis-routing-server/osrm-backend.git"
-  revision "a823897b1e16a0d8592f41a68062f4c4e279231c"
+  revision "91b0d0aad077a96f96fa42094639a6881f1aabcc"
   user "osrm"
   group "osrm"
   notifies :run, "execute[compile_osrm]", :immediately
@@ -169,7 +169,7 @@ if node[:osrm][:runfrontend]
 
   git "#{basedir}/osrm-frontend" do
     repository "git://github.com/fossgis-routing-server/osrm-frontend.git"
-    revision "dc07ddb6088a1fcb26fdbf01b5cad3611d91f5df"
+    revision "0fdc5e0234dcd57faf9a815889db3a1947309511"
     user "osrm"
     group "osrm"
     notifies :run, "execute[compile_osrm_frontend]", :immediately
@@ -212,7 +212,7 @@ end
 
 git "#{basedir}/cbf-routing-profiles" do
   repository "git://github.com/fossgis-routing-server/cbf-routing-profiles.git"
-  revision "9358cab13e55e61bea14da3534c0398a18f194d8"
+  revision "4a0ebb9974a806fb9df652ed75b79694aa038f1a"
   user "osrm"
   group "osrm"
 end
